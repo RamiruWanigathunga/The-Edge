@@ -12,13 +12,26 @@ export const PWABanner = () => {
     // Check if the app is already installed/running as a standalone PWA
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches || 
       ("standalone" in navigator && (navigator as any).standalone === true);
+      
+    const isInstalledPreviously = localStorage.getItem("pwa_installed") === "true";
 
-    if (isStandalone) {
+    if (isStandalone || isInstalledPreviously) {
+      if (isStandalone) {
+        localStorage.setItem("pwa_installed", "true");
+      }
       setIsInstalled(true);
       return;
     }
 
     setIsInstalled(false);
+
+    const handleAppInstalled = () => {
+      localStorage.setItem("pwa_installed", "true");
+      setClosing(true);
+      setTimeout(() => setDismissed(true), 300);
+    };
+
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     // Auto-hide after 10 seconds
     const timeout = setTimeout(() => {
@@ -26,7 +39,10 @@ export const PWABanner = () => {
       setTimeout(() => setDismissed(true), 300); // Wait for transition
     }, 10000);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
   }, []);
   
 
@@ -46,9 +62,9 @@ export const PWABanner = () => {
           <Smartphone className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm tracking-tight">Install THE EDGE</div>
+          <div className="font-semibold text-sm tracking-tight">Add to Home Screen</div>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            Add to home screen for one-tap ordering. No app store needed.
+            Tap Install in the popup to add this as an app. No app store required.
           </p>
         </div>
         <button

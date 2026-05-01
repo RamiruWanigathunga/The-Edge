@@ -28,6 +28,7 @@ export const PWABanner = () => {
 
     return () => clearTimeout(timeout);
   }, []);
+  
 
   const handleDismiss = () => {
     setClosing(true);

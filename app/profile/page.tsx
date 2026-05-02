@@ -9,14 +9,22 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { ProfileAvatar, regenerateProfileHue } from "@/components/ui/ProfileAvatar";
+import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
+import { useProfile } from "@/store/profile";
+
 export default function ProfilePage() {
   const { theme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
-  const [name, setName] = React.useState("Sarah Jenkins");
-  const [tempName, setTempName] = React.useState("Sarah Jenkins");
+  const { name, setName, email } = useProfile();
+  const [tempName, setTempName] = React.useState("");
   const [isEditingName, setIsEditingName] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (mounted) {
+      setTempName(name);
+    }
+  }, [mounted, name]);
 
   React.useEffect(() => {
     if (isEditingName && inputRef.current) {
@@ -38,7 +46,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] dark:bg-background">
-      <main className="container mx-auto px-4 py-8 md:py-12 pb-24">
+      <main className="container mx-auto px-4 py-8 md:pt-28 md:py-12 pb-24">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 lg:gap-12">
           
           {/* ── LEFT COLUMN (Profile Info) ── */}
@@ -67,7 +75,6 @@ export default function ProfilePage() {
                         if (e.key === "Enter" && tempName.trim().length > 0) {
                           if (name !== tempName.trim()) {
                             setName(tempName.trim());
-                            regenerateProfileHue();
                           }
                           setIsEditingName(false);
                         } else if (e.key === "Escape") {
@@ -79,7 +86,6 @@ export default function ProfilePage() {
                         if (tempName.trim().length > 0) {
                           if (name !== tempName.trim()) {
                             setName(tempName.trim());
-                            regenerateProfileHue();
                           }
                         }
                         setIsEditingName(false);
@@ -100,7 +106,6 @@ export default function ProfilePage() {
                           if (tempName.trim().length > 0) {
                             if (name !== tempName.trim()) {
                               setName(tempName.trim());
-                              regenerateProfileHue();
                             }
                             setIsEditingName(false);
                           }
@@ -117,7 +122,7 @@ export default function ProfilePage() {
                     </button>
                   </div>
                 </div>
-                <p className="text-muted-foreground text-sm font-medium mb-8">sarahjenkins22@gmail.com</p>
+                <p className="text-muted-foreground text-sm font-medium mb-8">{email}</p>
 
                 <div className="w-full grid grid-cols-3 gap-4 border-y border-border py-6 mb-8">
                   {stats.map((stat) => (

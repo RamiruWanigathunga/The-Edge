@@ -11,6 +11,7 @@ import { FoodCard } from "@/components/shop/FoodCard";
 import { useMenuItems, useShops } from "@/lib/supabase/hooks";
 import { useCart } from "@/store/cart";
 import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
+import { useProfile } from "@/store/profile";
 
 export default function HomePage() {
   const [query, setQuery] = useState("");
@@ -18,6 +19,14 @@ export default function HomePage() {
   const { data: shops = [] } = useShops();
   const { data: items = [] } = useMenuItems();
   const { favorites } = useCart();
+  const { name } = useProfile();
+
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning,";
+    if (hour < 17) return "Good Afternoon,";
+    return "Good Evening,";
+  }, []);
 
   const shopNames = useMemo(
     () => new Map(shops.map((shop) => [shop.id, shop.name])),
@@ -33,7 +42,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden pt-6 pb-2 md:pt-12 md:pb-8 bg-gradient-to-b from-[#eaf8e3] to-background dark:from-[#1a2e1d] dark:to-background">
+      <section className="relative overflow-hidden pt-6 pb-2 md:pt-28 md:pb-8 bg-gradient-to-b from-[#eaf8e3] to-background dark:from-black dark:to-background">
         <div className="container mx-auto px-4">
           <div className="animate-fade-up">
             {/* Profile Greeting */}
@@ -42,8 +51,8 @@ export default function HomePage() {
                 <ProfileAvatar className="w-full h-full" iconSize={24} />
               </Link>
               <div>
-                <div className="text-[13px] text-muted-foreground font-medium">Good Morning,</div>
-                <div className="text-lg font-semibold leading-tight text-foreground">Samantha</div>
+                <div className="text-[13px] text-muted-foreground font-medium">{greeting}</div>
+                <div className="text-lg font-semibold leading-tight text-foreground">{name.split(' ')[0]}</div>
               </div>
             </div>
 
@@ -102,9 +111,9 @@ export default function HomePage() {
       {/* ── SHOPS ── */}
       <section id="shops" className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Today&apos;s shops</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Today&apos;s shops</h2>
         </div>
-        <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide pb-2">
+        <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide px-4 -mx-4 pt-2 pb-8">
           {shops.map((s) => (
             <div key={s.id} className="w-[260px] shrink-0 snap-start">
               <ShopCard shop={s} />
@@ -118,7 +127,7 @@ export default function HomePage() {
         <section className="container mx-auto px-4 py-8">
           <div className="flex items-end justify-between mb-6">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Your favourites</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your favourites</h2>
             </div>
             <Link
               href="/favorites"
@@ -127,7 +136,7 @@ export default function HomePage() {
               View all
             </Link>
           </div>
-          <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide pb-2">
+          <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide px-4 -mx-4 pt-2 pb-8">
             {favouriteItems.map((i) => (
               <div key={i.id} className="w-[200px] md:w-[240px] shrink-0 snap-start">
                 <FoodCard item={i} shopName={shopNames.get(i.shopId)} />
@@ -140,9 +149,9 @@ export default function HomePage() {
       {/* ── MOST ORDERED ── */}
       {mostOrdered.length > 0 && (
         <section className="container mx-auto px-4 py-8">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6">Most ordered today</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">Most ordered today</h2>
           
-          <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide pb-2">
+          <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide px-4 -mx-4 pt-2 pb-8">
             {mostOrdered.map((i) => (
               <div key={i.id} className="w-[200px] md:w-[240px] shrink-0 snap-start">
                 <FoodCard item={i} shopName={shopNames.get(i.shopId)} />
@@ -155,8 +164,8 @@ export default function HomePage() {
       {/* ── RECENTLY ORDERED ── */}
       {recentlyOrdered.length > 0 && (
         <section className="container mx-auto px-4 py-8 mb-10">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-6">Recently ordered</h2>
-          <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide pb-2">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-6">Recently ordered</h2>
+          <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide px-4 -mx-4 pt-2 pb-8">
             {recentlyOrdered.map((i) => (
               <div key={i.id} className="w-[200px] md:w-[240px] shrink-0 snap-start">
                 <FoodCard item={i} shopName={shopNames.get(i.shopId)} />

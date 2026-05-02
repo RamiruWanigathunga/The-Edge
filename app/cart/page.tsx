@@ -17,7 +17,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-20 text-center">
+        <div className="container mx-auto px-4 py-20 md:pt-36 text-center">
           <div className="text-6xl mb-4">🛒</div>
           <h1 className="text-3xl font-bold tracking-tight">Your cart is empty</h1>
           <p className="text-muted-foreground mt-2">
@@ -37,7 +37,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 grid lg:grid-cols-[1fr_380px] gap-8">
+      <div className="container mx-auto px-4 py-8 md:pt-28 grid lg:grid-cols-[1fr_380px] gap-8">
         {/* Left: cart items */}
         <div>
 

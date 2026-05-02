@@ -2,11 +2,11 @@
 // Extracted from existing project. All values map to Tailwind CSS variables.
 
 export const colors = {
-  // Primary (brand blue)
-  primary: "hsl(211 100% 59%)",
-  primaryForeground: "hsl(0 0% 100%)",
-  primaryGlow: "hsl(211 100% 70%)",
-  primaryDark: "hsl(211 100% 65%)",
+  // Primary (brand green)
+  primary: "hsl(134 81% 65%)",
+  primaryForeground: "hsl(222 30% 10%)",
+  primaryGlow: "hsl(134 81% 75%)",
+  primaryDark: "hsl(134 81% 60%)",
 
   // Success (green)
   success: "hsl(134 81% 65%)",
@@ -46,14 +46,14 @@ export const colors = {
 };
 
 export const gradients = {
-  hero: "linear-gradient(135deg, hsl(211 100% 59%) 0%, hsl(190 95% 60%) 45%, hsl(137 80% 65%) 100%)",
+  hero: "linear-gradient(135deg, hsl(134 81% 65%) 0%, hsl(142 76% 80%) 45%, hsl(137 100% 92%) 100%)",
   success: "linear-gradient(135deg, hsl(137 100% 87%) 0%, hsl(134 81% 65%) 100%)",
 };
 
 export const shadows = {
-  soft: "0 1px 2px hsl(222 20% 8% / 0.04), 0 4px 12px hsl(222 20% 8% / 0.04)",
-  elevated: "0 8px 30px -8px hsl(211 100% 59% / 0.18), 0 2px 8px hsl(222 20% 8% / 0.06)",
-  pop: "0 20px 60px -20px hsl(211 100% 59% / 0.35)",
+  soft: "0 1px 2px hsl(0 0% 0% / 0.04), 0 4px 12px hsl(0 0% 0% / 0.04)",
+  elevated: "0 8px 30px -8px hsl(0 0% 0% / 0.12), 0 2px 8px hsl(0 0% 0% / 0.06)",
+  pop: "0 20px 60px -20px hsl(0 0% 0% / 0.15)",
 };
 
 export const typography = {

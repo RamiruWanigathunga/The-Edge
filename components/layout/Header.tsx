@@ -12,9 +12,19 @@ export const Header = () => {
   const count = useCart((s) => s.count());
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
+  const [scrolled, setScrolled] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
+    
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navLinks = [
@@ -23,15 +33,20 @@ export const Header = () => {
     { href: "/orders", label: "Orders", icon: ReceiptText },
   ];
 
+  const isHome = pathname === "/";
+
   return (
-    <header className="hidden md:block sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/60">
+    <header 
+      className={`hidden md:block fixed w-full top-0 z-40 transition-all duration-300 ${
+        !isHome || scrolled 
+          ? "bg-background/80 backdrop-blur-xl border-b border-border/60" 
+          : "bg-transparent border-transparent"
+      }`}
+    >
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group" id="header-logo">
-          <div className="w-8 h-8 rounded-xl hero-gradient grid place-items-center text-white font-bold text-sm shadow-elevated transition-smooth group-hover:scale-105">
-            E
-          </div>
-          <span className="font-bold tracking-tight text-lg">THE EDGE</span>
+          <span className="font-bold tracking-tight text-xl">THE EDGE</span>
         </Link>
 
         {/* Desktop Nav */}

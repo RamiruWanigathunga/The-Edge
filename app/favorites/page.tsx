@@ -14,7 +14,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 md:pt-28">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight mb-2">Favorites</h1>
           <p className="text-muted-foreground">The foods you love, all in one place.</p>

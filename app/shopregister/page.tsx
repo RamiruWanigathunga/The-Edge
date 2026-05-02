@@ -46,7 +46,7 @@ export default function ShopRegisterPage() {
   if (submitted) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-20 max-w-lg text-center">
+        <div className="container mx-auto px-4 py-20 md:pt-36 max-w-lg text-center">
           <div className="w-20 h-20 rounded-full bg-success-soft grid place-items-center mx-auto mb-6">
             <CheckCircle2 className="w-10 h-10 text-success-foreground" />
           </div>
@@ -84,7 +84,7 @@ export default function ShopRegisterPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="container mx-auto px-4 py-8 md:pt-28 max-w-2xl">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground focus-dashed transition-smooth mb-6"

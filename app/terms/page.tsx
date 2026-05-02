@@ -10,7 +10,7 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background">
       
-      <main className="container mx-auto px-4 py-12 max-w-3xl">
+      <main className="container mx-auto px-4 py-12 md:pt-28 max-w-3xl">
         <button 
           onClick={() => router.back()}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth mb-8 group"

@@ -58,9 +58,9 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 20% 8%;
 
-    --primary: 211 100% 59%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 211 100% 70%;
+    --primary: 134 81% 65%;
+    --primary-foreground: 222 30% 10%;
+    --primary-glow: 134 81% 75%;
 
     --success: 134 81% 65%;
     --success-foreground: 222 30% 10%;
@@ -83,16 +83,16 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 211 100% 59%;
+    --ring: 134 81% 65%;
 
     --radius: 1rem;
 
-    --gradient-hero: linear-gradient(135deg, hsl(211 100% 59%) 0%, hsl(190 95% 60%) 45%, hsl(137 80% 65%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(134 81% 65%) 0%, hsl(142 76% 80%) 45%, hsl(137 100% 92%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(137 100% 87%) 0%, hsl(134 81% 65%) 100%);
 
-    --edge-shadow-soft: 0 1px 2px hsl(222 20% 8% / 0.04), 0 4px 12px hsl(222 20% 8% / 0.04);
-    --edge-shadow-elevated: 0 8px 30px -8px hsl(211 100% 59% / 0.18), 0 2px 8px hsl(222 20% 8% / 0.06);
-    --edge-shadow-pop: 0 20px 60px -20px hsl(211 100% 59% / 0.35);
+    --edge-shadow-soft: 0 1px 2px hsl(0 0% 0% / 0.04), 0 4px 12px hsl(0 0% 0% / 0.04);
+    --edge-shadow-elevated: 0 8px 30px -8px hsl(0 0% 0% / 0.12), 0 2px 8px hsl(0 0% 0% / 0.06);
+    --edge-shadow-pop: 0 20px 60px -20px hsl(0 0% 0% / 0.15);
 
     --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
     --glass-bg: hsl(222 20% 8% / 0.04);
@@ -106,8 +106,8 @@
     --card-foreground: 0 0% 100%;
     --popover: 0 0% 4%;
     --popover-foreground: 0 0% 100%;
-    --primary: 211 100% 65%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 134 81% 65%;
+    --primary-foreground: 222 30% 6%;
     --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 8%;
@@ -118,7 +118,7 @@
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 12%;
     --input: 0 0% 10%;
-    --ring: 211 100% 65%;
+    --ring: 134 81% 65%;
     --glass-bg: hsl(0 0% 100% / 0.05);
     --glass-border: hsl(0 0% 100% / 0.1);
   }
@@ -204,13 +204,13 @@
   }
 
   .profile-avatar {
-    background-color: hsl(var(--profile-hue), 70%, 85%);
-    color: hsl(var(--profile-hue), 80%, 30%);
+    background-color: hsl(220 14% 90%);
+    color: hsl(220 9% 46%);
   }
 
   .dark .profile-avatar {
-    background-color: hsl(var(--profile-hue), 70%, 15%);
-    color: hsl(var(--profile-hue), 80%, 60%);
+    background-color: hsl(222 20% 18%);
+    color: hsl(220 10% 65%);
   }
 
   .scrollbar-hide::-webkit-scrollbar { display: none; }

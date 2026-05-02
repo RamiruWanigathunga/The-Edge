@@ -40,7 +40,7 @@ export const BottomNav = () => {
               <div className="relative">
                 <Icon
                   className={`w-5 h-5 transition-all ${
-                    isActive ? "text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" : "text-muted-foreground"
+                    isActive ? "text-primary drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]" : "text-muted-foreground"
                   }`}
                   strokeWidth={isActive ? 2.5 : 2}
                 />
@@ -52,7 +52,7 @@ export const BottomNav = () => {
               </div>
               <span
                 className={`text-[10px] font-medium transition-all ${
-                  isActive ? "text-primary drop-shadow-[0_0_5px_rgba(59,130,246,0.3)]" : "text-muted-foreground"
+                  isActive ? "text-primary drop-shadow-[0_0_5px_rgba(34,197,94,0.3)]" : "text-muted-foreground"
                 }`}
               >
                 {link.label}

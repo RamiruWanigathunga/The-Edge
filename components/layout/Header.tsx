@@ -33,10 +33,12 @@ export const Header = () => {
     { href: "/orders", label: "Orders", icon: ReceiptText },
   ];
 
+  const isHome = pathname === "/";
+
   return (
     <header 
       className={`hidden md:block fixed w-full top-0 z-40 transition-all duration-300 ${
-        scrolled 
+        !isHome || scrolled 
           ? "bg-background/80 backdrop-blur-xl border-b border-border/60" 
           : "bg-transparent border-transparent"
       }`}
@@ -44,10 +46,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group" id="header-logo">
-          <div className="w-8 h-8 rounded-xl hero-gradient grid place-items-center text-white font-bold text-sm shadow-elevated transition-smooth group-hover:scale-105">
-            E
-          </div>
-          <span className="font-bold tracking-tight text-lg">THE EDGE</span>
+          <span className="font-bold tracking-tight text-xl">THE EDGE</span>
         </Link>
 
         {/* Desktop Nav */}

@@ -6,7 +6,6 @@ export const Footer = () => (
   <footer className="border-t border-border mt-10">
     <div className="container mx-auto px-4 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
       <div className="flex items-center gap-2">
-        <div className="w-6 h-6 rounded-lg hero-gradient" />
         <span className="font-semibold text-foreground">THE EDGE</span>
         <span>· Campus food, sorted.</span>
       </div>

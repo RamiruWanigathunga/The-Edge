@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { ProfileAvatar, regenerateProfileHue } from "@/components/ui/ProfileAvatar";
+import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
 import { useProfile } from "@/store/profile";
 
 export default function ProfilePage() {
@@ -75,7 +75,6 @@ export default function ProfilePage() {
                         if (e.key === "Enter" && tempName.trim().length > 0) {
                           if (name !== tempName.trim()) {
                             setName(tempName.trim());
-                            regenerateProfileHue();
                           }
                           setIsEditingName(false);
                         } else if (e.key === "Escape") {
@@ -87,7 +86,6 @@ export default function ProfilePage() {
                         if (tempName.trim().length > 0) {
                           if (name !== tempName.trim()) {
                             setName(tempName.trim());
-                            regenerateProfileHue();
                           }
                         }
                         setIsEditingName(false);
@@ -108,7 +106,6 @@ export default function ProfilePage() {
                           if (tempName.trim().length > 0) {
                             if (name !== tempName.trim()) {
                               setName(tempName.trim());
-                              regenerateProfileHue();
                             }
                             setIsEditingName(false);
                           }

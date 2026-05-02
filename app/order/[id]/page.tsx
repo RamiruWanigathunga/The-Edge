@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Check, ChefHat, Bell, ArrowRight, Receipt, RotateCcw, AlertTriangle } from "lucide-react";
+import { Check, ChefHat, Bell, ArrowRight, RotateCcw, AlertTriangle } from "lucide-react";
 import { Footer } from "@/components/layout/Footer";
-import { shopById } from "@/lib/mockData";
+import { ReceiptCard } from "@/components/ui/ReceiptCard";
 import { useLiveOrder } from "@/lib/supabase/hooks";
 import { useCart } from "@/store/cart";
 import { toast } from "sonner";
+import type { PerShopOrder } from "@/lib/mockData";
 
 type Stage = 0 | 1 | 2;
 
@@ -22,7 +23,7 @@ export default function OrderStatusPage() {
   const params = useParams();
   const code = params?.id as string;
   const [stage, setStage] = useState<Stage>(0);
-  const [order, setOrder] = useState<any>(null);
+  const [orders, setOrders] = useState<PerShopOrder[]>([]);
   const [expired, setExpired] = useState(false);
   const { add } = useCart();
   const { data: liveOrder } = useLiveOrder(code);
@@ -30,22 +31,45 @@ export default function OrderStatusPage() {
   useEffect(() => {
     if (liveOrder) return;
 
-    const savedOrder = localStorage.getItem("edge-last-order");
-    if (savedOrder) {
-      setOrder(JSON.parse(savedOrder));
+    // Load from localStorage — try last-orders first (multi-shop checkout)
+    const lastOrders = localStorage.getItem("edge-last-orders");
+    if (lastOrders) {
+      try {
+        const parsed: PerShopOrder[] = JSON.parse(lastOrders);
+        // Filter orders matching this code, or show all if navigating from checkout
+        const matching = parsed.filter((o) => o.orderCode === code);
+        if (matching.length > 0) {
+          setOrders(matching);
+        } else {
+          // If code doesn't match, show all from last checkout
+          setOrders(parsed);
+        }
+      } catch {}
+    }
+
+    // Fallback: search in all orders
+    if (!lastOrders) {
+      const allOrders = localStorage.getItem("edge-orders");
+      if (allOrders) {
+        try {
+          const parsed: PerShopOrder[] = JSON.parse(allOrders);
+          const matching = parsed.filter((o) => o.orderCode === code);
+          if (matching.length > 0) {
+            setOrders(matching);
+          }
+        } catch {}
+      }
     }
 
     const t1 = setTimeout(() => setStage(1), 2500);
     const t2 = setTimeout(() => {
       setStage(2);
-      // In-app notification when ready
       toast.success("🎉 Your order is ready for pickup!", {
         description: `Show code ${code} at the counter`,
         duration: 8000,
       });
     }, 6000);
 
-    // Auto-expire after 30 min (mock: 90s for demo)
     const t3 = setTimeout(() => {
       setExpired(true);
       toast.error("Order expired", {
@@ -74,10 +98,16 @@ export default function OrderStatusPage() {
 
     setStage(statusStage[liveOrder.status] ?? 0);
     setExpired(liveOrder.status === "expired" || liveOrder.status === "customer_late");
-    setOrder({
+
+    const livePerShop: PerShopOrder = {
       id: liveOrder.id,
-      total: liveOrder.total,
-      items: liveOrder.items.map((item) => ({
+      orderCode: code,
+      referenceNumber: "",
+      shopId: liveOrder.items[0]?.shopId || "",
+      shopName: "Campus vendor",
+      shopEmoji: "🍽️",
+      customerName: "Guest",
+      items: liveOrder.items.map((item: any) => ({
         item: {
           id: item.id,
           shopId: item.shopId,
@@ -94,10 +124,16 @@ export default function OrderStatusPage() {
         notes: item.notes,
         dining: item.dining,
       })),
-    });
-  }, [liveOrder]);
+      total: liveOrder.total,
+      orderTime: "",
+      status: liveOrder.status,
+      placedAt: new Date().toISOString(),
+      slot: "ASAP",
+    };
+    setOrders([livePerShop]);
+  }, [liveOrder, code]);
 
-  if (!order) {
+  if (orders.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-20 md:pt-36 text-center">
@@ -112,17 +148,12 @@ export default function OrderStatusPage() {
     );
   }
 
-  const grouped = new Map<string, any[]>();
-  order.items.forEach((c: any) => {
-    const arr = grouped.get(c.item.shopId) ?? [];
-    arr.push(c);
-    grouped.set(c.item.shopId, arr);
-  });
-
   const handleReorder = () => {
     // TODO: Replace with Supabase query to fetch original order items
-    order.items.forEach((c: any) => {
-      add(c.item, c.qty, { notes: c.notes, dining: c.dining });
+    orders.forEach((order) => {
+      order.items.forEach((c) => {
+        add(c.item, c.qty, { notes: c.notes, dining: c.dining as "dine-in" | "takeaway" });
+      });
     });
     toast.success("Items added to cart!");
   };
@@ -142,34 +173,17 @@ export default function OrderStatusPage() {
           </div>
         )}
 
-        {/* Pickup code hero card */}
-        <div
-          className={`rounded-[2rem] p-8 text-center transition-smooth shadow-pop ${
-            stage === 2 && !expired
-              ? "bg-success text-success-foreground"
-              : expired
-              ? "bg-muted text-muted-foreground"
-              : "hero-gradient text-white"
-          }`}
-        >
-          <div className="label-mono opacity-80 text-current mb-3">● Pickup code</div>
-          <div className="font-mono font-bold text-7xl sm:text-8xl tracking-[0.15em] mt-3">
-            {code}
-          </div>
-          <p className="mt-4 opacity-90 text-sm">
-            {expired
-              ? "This order has expired."
-              : stage === 2
-              ? "Show this code at the shop counter to collect your order."
-              : "Save this code — you'll need it at pickup."}
-          </p>
+        {/* Per-shop receipts — shown at the top */}
+        <div className="space-y-4 mb-8">
+          {orders.map((order) => (
+            <ReceiptCard key={order.id} order={order} />
+          ))}
         </div>
 
         {/* Progress timeline */}
-        <div className="mt-8 rounded-3xl border border-border bg-card p-6">
+        <div className="rounded-3xl border border-border bg-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="font-semibold tracking-tight">Order status</h2>
-            <span className="font-mono text-xs text-muted-foreground">#{order.id}</span>
           </div>
           <div className="relative">
             <div className="absolute left-5 top-5 bottom-5 w-0.5 bg-border" />
@@ -206,65 +220,6 @@ export default function OrderStatusPage() {
                 );
               })}
             </div>
-          </div>
-        </div>
-
-        {/* Per-shop receipts */}
-        <div className="mt-8 space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Receipt className="w-4 h-4" />
-            <h2 className="font-semibold tracking-tight">
-              Pickup receipts ({grouped.size})
-            </h2>
-          </div>
-          {Array.from(grouped.entries()).map(([shopId, list]) => {
-            const shop = shopById(shopId);
-            const sub = list.reduce((n: number, c: any) => n + c.qty * c.item.price, 0);
-            return (
-              <div key={shopId} className="rounded-3xl border border-border bg-card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-secondary grid place-items-center text-xl">
-                      {shop?.emoji ?? "🍽️"}
-                    </div>
-                    <div>
-                      <div className="font-semibold">{shop?.name ?? "Campus vendor"}</div>
-                      <div className="text-xs text-muted-foreground font-mono">
-                        Code: <span className="font-bold tracking-widest">{code}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className="font-mono font-semibold">Rs {sub}</span>
-                </div>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  {list.map((c: any) => (
-                    <li key={c.item.id} className="flex justify-between">
-                      <span>
-                        {c.qty}× {c.item.title}{" "}
-                        <span className="text-xs">({c.dining})</span>
-                        {c.notes && (
-                          <span className="text-xs italic"> · {c.notes}</span>
-                        )}
-                      </span>
-                      <span className="font-mono">Rs {c.qty * c.item.price}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Master total */}
-        <div className="mt-4 rounded-3xl border border-border bg-card p-5">
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="label-mono mb-1">Master receipt</div>
-              <div className="text-sm text-muted-foreground">
-                {order.items.length} item{order.items.length !== 1 ? "s" : ""} across {grouped.size} shop{grouped.size !== 1 ? "s" : ""}
-              </div>
-            </div>
-            <div className="font-mono text-2xl font-bold">Rs {order.total}</div>
           </div>
         </div>
 

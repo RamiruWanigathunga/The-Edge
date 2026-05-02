@@ -3,7 +3,7 @@
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // TODO: Replace with real PostHog key from environment variable
 // import posthog from "posthog-js";
 // import { PostHogProvider } from "posthog-js/react";
@@ -20,6 +20,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
         },
       })
   );
+  const [position, setPosition] = useState<"bottom-right" | "top-center">("bottom-right");
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition(window.innerWidth < 768 ? "top-center" : "bottom-right");
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -32,7 +42,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         {children}
         <Toaster
           richColors
-          position="top-right"
+          position={position}
           toastOptions={{
             style: {
               background: "hsl(var(--card))",

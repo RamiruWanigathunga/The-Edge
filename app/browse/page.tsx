@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
 import { Footer } from "@/components/layout/Footer";
 import { FoodCard } from "@/components/shop/FoodCard";
 import { mockCategories } from "@/lib/mockData";
@@ -35,6 +36,7 @@ function BrowseContent() {
   const [priceOpen, setPriceOpen] = useState(false);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [visibleCount, setVisibleCount] = useState(12);
   const { data: shops = [] } = useShops();
   const { data: items = [] } = useMenuItems();
   const shopNames = useMemo(
@@ -42,20 +44,64 @@ function BrowseContent() {
     [shops]
   );
 
-  const filtered = items.filter((i) => {
-    const matchQ = query
-      ? i.title.toLowerCase().includes(query.toLowerCase()) ||
-        i.description.toLowerCase().includes(query.toLowerCase())
-      : true;
-    const matchC = activeCat ? i.category === activeCat : true;
-    const matchD = activeDiet ? i.dietaryTags.includes(activeDiet) : true;
-    const matchS = activeShop ? i.shopId === activeShop : true;
-    const min = parseFloat(minPrice);
-    const max = parseFloat(maxPrice);
-    const matchMin = !isNaN(min) ? i.price >= min : true;
-    const matchMax = !isNaN(max) ? i.price <= max : true;
-    return matchQ && matchC && matchD && matchS && matchMin && matchMax;
-  });
+  const filtered = useMemo(() => {
+    return items.filter((i) => {
+      const shopName = (shopNames.get(i.shopId) || "").toLowerCase();
+      const normalizedQuery = query.toLowerCase().trim();
+      
+      const matchC = activeCat ? i.category === activeCat : true;
+      const matchD = activeDiet ? i.dietaryTags.includes(activeDiet) : true;
+      const matchS = activeShop ? i.shopId === activeShop : true;
+      const min = parseFloat(minPrice);
+      const max = parseFloat(maxPrice);
+      const matchMin = !isNaN(min) ? i.price >= min : true;
+      const matchMax = !isNaN(max) ? i.price <= max : true;
+
+      if (!normalizedQuery) {
+        return matchC && matchD && matchS && matchMin && matchMax;
+      }
+
+      // Smart search: elongated chars, keywords, vendor name
+      // reduce repeated characters (e.g., kottuuuuu -> kottu)
+      const simplifiedQuery = normalizedQuery.replace(/(.)\1{2,}/g, '$1');
+      
+      const searchFields = [
+        i.title.toLowerCase(),
+        i.description.toLowerCase(),
+        shopName,
+        ...(i.searchKeywords || []).map(k => k.toLowerCase())
+      ];
+
+      const matchQ = searchFields.some(field => 
+        field.includes(normalizedQuery) || 
+        field.includes(simplifiedQuery) ||
+        normalizedQuery.includes(field)
+      );
+
+      return matchQ && matchC && matchD && matchS && matchMin && matchMax;
+    });
+  }, [items, query, activeCat, activeDiet, activeShop, minPrice, maxPrice, shopNames]);
+
+  const visibleItems = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [query, activeCat, activeDiet, activeShop, minPrice, maxPrice]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 500
+      ) {
+        if (visibleCount < filtered.length) {
+          setVisibleCount((prev) => prev + 8);
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [visibleCount, filtered.length]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,10 +263,31 @@ function BrowseContent() {
                 {filtered.length} item{filtered.length !== 1 ? "s" : ""} found
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                {filtered.map((i) => (
-                  <FoodCard key={i.id} item={i} shopName={shopNames.get(i.shopId)} />
+                {visibleItems.map((i, idx) => (
+                  <motion.div
+                    key={i.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ 
+                      duration: 0.4, 
+                      delay: (idx % 8) * 0.05,
+                      ease: [0.23, 1, 0.32, 1]
+                    }}
+                  >
+                    <FoodCard item={i} shopName={shopNames.get(i.shopId)} />
+                  </motion.div>
                 ))}
               </div>
+              {visibleCount < filtered.length && (
+                <div className="mt-12 flex justify-center">
+                  <div className="flex items-center gap-2 text-muted-foreground animate-pulse">
+                    <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                    <span className="text-xs font-medium ml-2">Loading more...</span>
+                  </div>
+                </div>
+              )}
               {filtered.length === 0 && (
                 <div className="text-center py-20 text-muted-foreground bg-secondary/30 rounded-[2rem] border border-dashed border-border">
                   No items found matching your filters.

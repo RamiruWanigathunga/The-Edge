@@ -1,18 +1,28 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   
   // Hide global navigation on login and vendor dashboard pages
   const isLoginPage = pathname === "/login";
   const isVendorPage = pathname.startsWith("/vendor");
-  const isAuthCallback = pathname.startsWith("/auth");
+  const isAuthPage = pathname === "/auth" || pathname.startsWith("/auth/");
   
-  const hideNav = isLoginPage || isVendorPage || isAuthCallback;
+  useEffect(() => {
+    // Simulated frontend auth guard
+    const isOnboarded = localStorage.getItem("edge-onboarded");
+    if (!isOnboarded && !isLoginPage && !isVendorPage && !isAuthPage) {
+      router.push("/auth");
+    }
+  }, [pathname, isLoginPage, isVendorPage, isAuthPage, router]);
+  
+  const hideNav = isLoginPage || isVendorPage || isAuthPage;
 
   if (hideNav) {
     return <>{children}</>;

@@ -25,6 +25,7 @@ type ShopRow = {
   tags: string[] | null;
   categories: string[] | null;
   payment_link: string | null;
+  letter_code: string | null;
 };
 
 type MenuItemRow = {
@@ -43,6 +44,7 @@ type MenuItemRow = {
   is_available: boolean;
   badge: string | null;
   is_popular: boolean;
+  search_keywords: string[] | null;
 };
 
 export type VendorOrder = {
@@ -105,6 +107,7 @@ function mapShop(row: ShopRow): Shop {
     categories: row.categories ?? [],
     paymentLink: row.payment_link ?? undefined,
     ownerId: row.owner_id ?? undefined,
+    letterCode: row.letter_code ?? row.name.charAt(0).toUpperCase(),
   };
 }
 
@@ -125,6 +128,7 @@ function mapMenuItem(row: MenuItemRow): MenuItem {
     isAvailable: row.is_available,
     badge: row.badge ?? undefined,
     popular: row.is_popular,
+    searchKeywords: row.search_keywords ?? [],
   };
 }
 

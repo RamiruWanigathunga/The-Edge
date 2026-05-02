@@ -19,6 +19,7 @@ export type Shop = {
   categories: string[];
   paymentLink?: string;
   ownerId?: string;
+  letterCode: string;
 };
 
 export type MenuItem = {
@@ -37,6 +38,7 @@ export type MenuItem = {
   isAvailable: boolean;
   badge?: string;
   popular?: boolean;
+  searchKeywords?: string[];
 };
 
 export type CartItem = {
@@ -109,6 +111,7 @@ export const mockShops: Shop[] = [
     tags: ["Desserts", "Beverages", "Vegetarian"],
     categories: ["Desserts", "Drinks"],
     paymentLink: "https://pay.example/rocksweats",
+    letterCode: "R",
   },
   {
     id: "desi",
@@ -126,6 +129,7 @@ export const mockShops: Shop[] = [
     tags: ["Rice & Meals", "Halal", "Lunch"],
     categories: ["Rice & Meals", "Snacks"],
     paymentLink: "https://pay.example/desipalace",
+    letterCode: "D",
   },
   {
     id: "juice",
@@ -143,6 +147,7 @@ export const mockShops: Shop[] = [
     tags: ["Juice", "Vegan", "Gluten-Free"],
     categories: ["Juice", "Smoothies"],
     paymentLink: "https://pay.example/juicehub",
+    letterCode: "J",
   },
   {
     id: "snack",
@@ -160,6 +165,7 @@ export const mockShops: Shop[] = [
     tags: ["Snacks", "Vegan", "Quick Bite"],
     categories: ["Snacks"],
     paymentLink: "https://pay.example/shorteats",
+    letterCode: "S",
   },
   {
     id: "brew",
@@ -178,6 +184,7 @@ export const mockShops: Shop[] = [
     tags: ["Coffee", "Beverages", "Vegetarian"],
     categories: ["Coffee", "Drinks"],
     paymentLink: "https://pay.example/brewlab",
+    letterCode: "B",
   },
 ];
 
@@ -201,6 +208,7 @@ export const mockItems: MenuItem[] = [
     isAvailable: true,
     badge: "🏆 Most Ordered",
     popular: true,
+    searchKeywords: ["fried rice", "rice", "lunch", "egg"],
   },
   {
     id: "i2",
@@ -216,6 +224,7 @@ export const mockItems: MenuItem[] = [
     maxPerOrder: 3,
     isAvailable: true,
     popular: false,
+    searchKeywords: ["koththu", "kottu", "spicy", "chicken", "dinner"],
   },
   {
     id: "i3",
@@ -230,6 +239,7 @@ export const mockItems: MenuItem[] = [
     isAvailable: true,
     badge: "🔥 Popular",
     popular: true,
+    searchKeywords: ["mango", "juice", "drink", "cold"],
   },
   {
     id: "i4",
@@ -243,6 +253,7 @@ export const mockItems: MenuItem[] = [
     estimatedPrepTime: "6 min",
     isAvailable: false, // Shop is closed
     popular: false,
+    searchKeywords: ["coffee", "latte", "iced", "caffeine"],
   },
   {
     id: "i5",
@@ -257,6 +268,7 @@ export const mockItems: MenuItem[] = [
     isAvailable: true,
     badge: "🏆 Fan Favourite",
     popular: true,
+    searchKeywords: ["yogurt", "curd", "lassi", "drink", "mint"],
   },
   {
     id: "i6",
@@ -270,6 +282,7 @@ export const mockItems: MenuItem[] = [
     estimatedPrepTime: "5 min",
     isAvailable: true,
     popular: false,
+    searchKeywords: ["toffee", "sweet", "milk", "dessert"],
   },
   {
     id: "i7",
@@ -284,6 +297,7 @@ export const mockItems: MenuItem[] = [
     isAvailable: true,
     badge: "🔥 Hot & Fresh",
     popular: true,
+    searchKeywords: ["samosa", "short eats", "snacks", "veg"],
   },
   {
     id: "i8",
@@ -297,6 +311,7 @@ export const mockItems: MenuItem[] = [
     estimatedPrepTime: "4 min",
     isAvailable: true,
     popular: false,
+    searchKeywords: ["cutlet", "fish", "short eats", "snacks"],
   },
   {
     id: "i9",
@@ -310,6 +325,7 @@ export const mockItems: MenuItem[] = [
     estimatedPrepTime: "3 min",
     isAvailable: true,
     popular: false,
+    searchKeywords: ["watermelon", "juice", "drink", "cold"],
   },
   {
     id: "i10",
@@ -324,6 +340,7 @@ export const mockItems: MenuItem[] = [
     availableSlots: ["11:00 AM - 4:00 PM"],
     isAvailable: true,
     popular: false,
+    searchKeywords: ["dhal", "rice", "curry", "lunch", "vegan"],
   },
 ];
 
@@ -394,8 +411,166 @@ export const mockOrders = [
     total: 720,
     status: "new" as OrderStatus,
     time: "1 min ago",
+  },
+];
+
+// ---------------------------------------------------------------------------
+// ORDER CODE GENERATION UTILITIES
+// ---------------------------------------------------------------------------
+
+/** Get or create today's order counter from localStorage */
+export function getNextOrderCode(): string {
+  const todayKey = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const storageKey = "edge-order-counter";
+  let counter = 1;
+  try {
+    const stored = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    if (stored.date === todayKey) {
+      counter = (stored.count || 0) + 1;
+    }
+    localStorage.setItem(storageKey, JSON.stringify({ date: todayKey, count: counter }));
+  } catch {
+    localStorage.setItem(storageKey, JSON.stringify({ date: todayKey, count: counter }));
+  }
+  return String(counter).padStart(4, "0");
+}
+
+/** Generate a unique reference number for an order
+ *  Format: #[ShopLetter][RandomLetter][DDMM][HHMM][OrderCode]
+ *  Example: #RF0305 14320001
+ */
+export function generateReferenceNumber(shopLetterCode: string, orderCode: string): string {
+  const randomLetter = "ABCDEFGHJKLMNPQRSTUVWXYZ"[Math.floor(Math.random() * 23)];
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const hh = String(now.getHours()).padStart(2, "0");
+  const min = String(now.getMinutes()).padStart(2, "0");
+  return `#${shopLetterCode}${randomLetter}${dd}${mm}${hh}${min}${orderCode}`;
+}
+
+/** Format time as HH.MM (24-hour) */
+export function formatOrderTime(date: Date): string {
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${hh}.${min}`;
+}
+
+// Per-shop order type used in order history
+export type PerShopOrder = {
+  id: string;
+  orderCode: string;
+  referenceNumber: string;
+  shopId: string;
+  shopName: string;
+  shopEmoji: string;
+  shopBanner?: string;
+  customerName: string;
+  items: { item: MenuItem; qty: number; notes?: string; dining: string }[];
+  total: number;
+  orderTime: string;
+  status: string;
+  placedAt: string;
+  slot: string;
+  note?: string;
+};
+
+export const mockUserOrders: PerShopOrder[] = [
+  {
+    id: "ORD-1A",
+    orderCode: "0001",
+    referenceNumber: "#DK03051430 0001",
+    shopId: "desi",
+    shopName: "Desi Palace",
+    shopEmoji: "🍛",
+    shopBanner: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800&h=400&fit=crop",
+    customerName: "Wenuja",
+    items: [{ item: mockItems[0], qty: 1, dining: "takeaway" }],
+    total: 450,
+    orderTime: "14.30",
+    status: "completed",
+    placedAt: new Date().toISOString(),
+    slot: "ASAP",
+  },
+  {
+    id: "ORD-1B",
+    orderCode: "0002",
+    referenceNumber: "#DM01051215 0002",
+    shopId: "desi",
+    shopName: "Desi Palace",
+    shopEmoji: "🍛",
+    shopBanner: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800&h=400&fit=crop",
+    customerName: "Wenuja",
+    items: [{ item: mockItems[1], qty: 1, dining: "dine-in" }],
+    total: 580,
+    orderTime: "12.15",
+    status: "completed",
+    placedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+    slot: "ASAP",
+  },
+  {
+    id: "ORD-2A",
+    orderCode: "0003",
+    referenceNumber: "#JN28041030 0003",
+    shopId: "juice",
+    shopName: "Juice Hub",
+    shopEmoji: "🥤",
+    shopBanner: "https://images.unsplash.com/photo-1546173159-315724a31696?w=800&h=400&fit=crop",
+    customerName: "Wenuja",
+    items: [{ item: mockItems[2], qty: 2, dining: "takeaway" }],
+    total: 560,
+    orderTime: "10.30",
+    status: "completed",
+    placedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+    slot: "+15 min",
+  },
+  {
+    id: "ORD-3A",
+    orderCode: "0004",
+    referenceNumber: "#RH21040900 0004",
+    shopId: "rocky",
+    shopName: "Rocky Sweats",
+    shopEmoji: "🍡",
+    shopBanner: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800&h=400&fit=crop",
+    customerName: "Wenuja",
+    items: [{ item: mockItems[4], qty: 1, dining: "dine-in" }],
+    total: 220,
+    orderTime: "09.00",
+    status: "completed",
+    placedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 12).toISOString(),
+    slot: "ASAP",
+  },
+  {
+    id: "ORD-4A",
+    orderCode: "0005",
+    referenceNumber: "#SA13041545 0005",
     shopId: "snack",
-    pickupTime: "ASAP",
+    shopName: "Short Eats Co.",
+    shopEmoji: "🥟",
+    shopBanner: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&h=400&fit=crop",
+    customerName: "Wenuja",
+    items: [{ item: mockItems[6], qty: 3, dining: "takeaway" }],
+    total: 540,
+    orderTime: "15.45",
+    status: "completed",
+    placedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20).toISOString(),
+    slot: "ASAP",
+  },
+  {
+    id: "ORD-5A",
+    orderCode: "0006",
+    referenceNumber: "#DB19030830 0006",
+    shopId: "desi",
+    shopName: "Desi Palace",
+    shopEmoji: "🍛",
+    shopBanner: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800&h=400&fit=crop",
+    customerName: "Wenuja",
+    items: [{ item: mockItems[0], qty: 1, dining: "takeaway" }],
+    total: 450,
+    orderTime: "08.30",
+    status: "completed",
+    placedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 45).toISOString(),
+    slot: "ASAP",
   },
 ];
 

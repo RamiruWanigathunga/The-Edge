@@ -5,14 +5,29 @@ import { motion } from "framer-motion";
 import { Mail, ArrowRight, User, Sparkles, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const router = useRouter();
 
   const toggleMode = () => {
     setMode(prev => (prev === "login" ? "signup" : "login"));
+  };
+
+  const handleAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Frontend-only simulation for now
+    localStorage.setItem("edge-onboarded", "true");
+    localStorage.setItem("edge-user-name", name || "User");
+    localStorage.setItem("edge-user-email", email || "user@example.com");
+    
+    // Set cookie for server-side proxy
+    document.cookie = "edge-onboarded=true; path=/; max-age=31536000";
+    
+    router.push("/");
   };
 
   return (
@@ -98,7 +113,10 @@ export default function AuthPage() {
                   </div>
                 </div>
 
-                <button className="w-full h-14 mt-4 bg-foreground text-background font-bold rounded-2xl flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-[0.98] transform group shadow-xl shadow-foreground/5 overflow-hidden relative">
+                <button 
+                  onClick={handleAuth}
+                  className="w-full h-14 mt-4 bg-foreground text-background font-bold rounded-2xl flex items-center justify-center gap-2 hover:opacity-90 transition-all active:scale-[0.98] transform group shadow-xl shadow-foreground/5 overflow-hidden relative"
+                >
                   <span className="relative z-10 flex items-center gap-2">
                     {mode === "login" ? "Send magic link" : "Create account"}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

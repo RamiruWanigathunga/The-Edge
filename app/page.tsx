@@ -42,7 +42,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden pt-6 pb-2 md:pt-28 md:pb-8 bg-gradient-to-b from-[#eaf8e3] to-background dark:from-[#1a2e1d] dark:to-background">
+      <section className="relative overflow-hidden pt-6 pb-2 md:pt-28 md:pb-8 bg-gradient-to-b from-[#eaf8e3] to-background dark:from-black dark:to-background">
         <div className="container mx-auto px-4">
           <div className="animate-fade-up">
             {/* Profile Greeting */}

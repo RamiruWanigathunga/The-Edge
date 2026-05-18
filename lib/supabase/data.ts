@@ -360,7 +360,7 @@ export async function createOrder(params: CreateOrderParams): Promise<CreateOrde
 // ---------------------------------------------------------------------------
 
 function formatRelativeTime(value: string) {
-  const diffMs = Date.now() - new Date(value).getTime();
+  const diffMs = Date.now() - new Date(value.replace(" ", "T")).getTime();
   const diffMin = Math.max(0, Math.round(diffMs / 60000));
   if (diffMin < 1) return "just now";
   if (diffMin === 1) return "1 min ago";
@@ -422,11 +422,11 @@ export async function fetchVendorOrders(
     note: row.note ?? undefined,
     shopId,
     pickupTime: row.pickup_time
-      ? new Date(row.pickup_time).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+      ? new Date(row.pickup_time.replace(" ", "T")).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
       : "ASAP",
     scheduledSlot: row.scheduled_slot,
     customerName: row.customer_name,
-    createdAt: row.created_at,
+    createdAt: row.created_at.replace(" ", "T"),
   }));
 }
 
@@ -486,11 +486,11 @@ export async function searchVendorOrders(
     note: row.note ?? undefined,
     shopId,
     pickupTime: row.pickup_time
-      ? new Date(row.pickup_time).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+      ? new Date(row.pickup_time.replace(" ", "T")).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
       : "ASAP",
     scheduledSlot: row.scheduled_slot,
     customerName: row.customer_name,
-    createdAt: row.created_at,
+    createdAt: row.created_at.replace(" ", "T"),
   }));
 }
 
@@ -520,7 +520,7 @@ export async function fetchUserOrders(userId: string): Promise<LiveOrder[]> {
     pickupTime: row.pickup_time ?? "",
     scheduledSlot: row.scheduled_slot,
     note: row.note ?? undefined,
-    createdAt: row.created_at,
+    createdAt: row.created_at.replace(" ", "T"),
     customerName: row.customer_name,
     shopName: row.shops?.name ?? "",
     shopEmoji: row.shops?.emoji ?? "🍽️",
@@ -812,7 +812,7 @@ export async function fetchOrderByCode(code: string): Promise<LiveOrder | null> 
     pickupTime: data.pickup_time ?? "",
     scheduledSlot: data.scheduled_slot,
     note: data.note ?? undefined,
-    createdAt: data.created_at,
+    createdAt: data.created_at.replace(" ", "T"),
     customerName: data.customer_name,
     shopName: (data as unknown as OrderWithItemsRow).shops?.name ?? "",
     shopEmoji: (data as unknown as OrderWithItemsRow).shops?.emoji ?? "🍽️",

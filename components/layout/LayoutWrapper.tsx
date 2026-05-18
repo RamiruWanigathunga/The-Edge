@@ -6,6 +6,8 @@ import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
+
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -52,7 +54,12 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   }
 
   if (hideNav) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <OfflineBanner />
+      </>
+    );
   }
 
   return (
@@ -62,6 +69,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         {children}
       </div>
       <BottomNav />
+      <OfflineBanner />
     </div>
   );
 }

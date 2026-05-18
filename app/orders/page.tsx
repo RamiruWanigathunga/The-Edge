@@ -20,7 +20,7 @@ export default function OrdersPage() {
 
   const filteredOrders = useMemo(() => {
     const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfToday = new Date(now.getTime() - 24 * 60 * 60 * 1000); // Last 24 hours
     const startOfWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -96,7 +96,16 @@ export default function OrdersPage() {
           ))}
         </div>
 
-        {visibleOrders.length > 0 ? (
+        {isLoading ? (
+          <div className="py-24 flex justify-center">
+            <div className="animate-pulse flex items-center gap-2 text-muted-foreground font-medium">
+              <div className="w-1.5 h-1.5 rounded-full bg-current" />
+              <div className="w-1.5 h-1.5 rounded-full bg-current" />
+              <div className="w-1.5 h-1.5 rounded-full bg-current" />
+              Loading your orders...
+            </div>
+          </div>
+        ) : visibleOrders.length > 0 ? (
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">
               {visibleOrders.map((order, idx) => {

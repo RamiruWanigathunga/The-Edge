@@ -26,6 +26,7 @@ export default function ProfilePage() {
   
   const [tempName, setTempName] = React.useState("");
   const [isEditingName, setIsEditingName] = React.useState(false);
+  const [isSavingName, setIsSavingName] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -46,6 +47,7 @@ export default function ProfilePage() {
 
   const handleUpdateName = async () => {
     if (!user || !tempName.trim()) return;
+    setIsSavingName(true);
     try {
       await updateProfile(user.id, { display_name: tempName.trim() });
       await refetchProfile();
@@ -53,6 +55,8 @@ export default function ProfilePage() {
       toast.success("Name updated");
     } catch (e) {
       toast.error("Failed to update name");
+    } finally {
+      setIsSavingName(false);
     }
   };
 
@@ -120,7 +124,13 @@ export default function ProfilePage() {
                       onClick={() => setIsEditingName(true)}
                       className="text-muted-foreground hover:text-primary transition-smooth"
                     >
-                      {isEditingName ? <Check className="w-5 h-5 text-success" /> : <Pencil className="w-4 h-4" />}
+                      {isSavingName ? (
+                        <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                      ) : isEditingName ? (
+                        <Check className="w-5 h-5 text-success" />
+                      ) : (
+                        <Pencil className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                 </div>

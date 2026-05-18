@@ -119,13 +119,25 @@ export default function ShopPage() {
         )}
 
         {/* Menu grid */}
-        <div className="mt-8 grid grid-cols-2 lg:grid-cols-3 gap-5">
-          {visible.map((i) => (
-            <FoodCard key={i.id} item={i} compact />
-          ))}
-        </div>
+        {items.length === 0 ? (
+          <div className="text-center py-24 mt-8 rounded-[2rem] border border-dashed border-border bg-secondary/20">
+            <div className="w-16 h-16 rounded-full bg-secondary grid place-items-center mx-auto mb-4">
+              <span className="text-2xl">👨‍🍳</span>
+            </div>
+            <h2 className="text-xl font-semibold mb-2">The chef is still prepping</h2>
+            <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
+              This shop hasn't added any menu items yet. Check back later for delicious food!
+            </p>
+          </div>
+        ) : (
+          <div className="mt-8 grid grid-cols-2 lg:grid-cols-3 gap-5">
+            {visible.map((i) => (
+              <FoodCard key={i.id} item={i} compact />
+            ))}
+          </div>
+        )}
 
-        {visible.length === 0 && (
+        {items.length > 0 && visible.length === 0 && (
           <div className="text-center py-16 text-muted-foreground">
             No items in this category.
           </div>

@@ -122,6 +122,7 @@ export function useLiveOrder(code: string) {
     queryKey: ["order", code],
     queryFn: () => fetchOrderByCode(code),
     enabled: Boolean(code),
+    refetchInterval: 15000, // Backup polling for mobile sleep/wake
   });
 
   useEffect(() => {

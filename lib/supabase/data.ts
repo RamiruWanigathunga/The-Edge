@@ -379,7 +379,7 @@ export async function fetchVendorOrders(
   const now = new Date();
   let fromDate: string;
   if (dateFilter === "today") {
-    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(); // Last 24 hours
   } else if (dateFilter === "week") {
     const d = new Date(now);
     d.setDate(d.getDate() - 7);
@@ -441,7 +441,7 @@ export async function searchVendorOrders(
   const now = new Date();
   let fromDate: string;
   if (dateFilter === "today") {
-    fromDate = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+    fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(); // Last 24 hours
   } else if (dateFilter === "week") {
     const d = new Date(now); d.setDate(d.getDate() - 7); fromDate = d.toISOString();
   } else {

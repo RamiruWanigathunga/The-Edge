@@ -112,7 +112,7 @@ If a vendor is approved but cannot log in:
 
 ## LICENSE
 
-Copyright (c) 2026 Your Team
+Copyright (c) 2026 Bro Code Collective
 
 All rights reserved.
 

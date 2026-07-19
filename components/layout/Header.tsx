@@ -46,7 +46,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group" id="header-logo">
-          <span className="font-bold tracking-tight text-xl">THE EDGE</span>
+          <span className="font-bold tracking-tight text-xl">The Edge</span>
         </Link>
 
         {/* Desktop Nav */}

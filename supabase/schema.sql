@@ -1,4 +1,4 @@
--- THE EDGE Phase 2 - Production Schema
+-- The Edge Phase 2 - Production Schema
 -- Final version with Multi-shop support, Daily Codes, and Sync
 
 -- 1. EXTENSIONS

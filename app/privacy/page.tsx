@@ -12,7 +12,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="mb-4 text-xl font-bold text-foreground">1. Information We Collect</h2>
             <p>
-              THE EDGE stores only the information needed to provide campus food ordering,
+              The Edge stores only the information needed to provide campus food ordering,
               such as your email address, profile details, saved favorites, and order history.
             </p>
           </section>

@@ -1,4 +1,4 @@
-// Design System Tokens — THE EDGE
+// Design System Tokens — The Edge
 // Extracted from existing project. All values map to Tailwind CSS variables.
 
 export const colors = {

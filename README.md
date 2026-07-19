@@ -1,32 +1,7 @@
-# THE EDGE
+# The Edge
 
 **Your campus, served faster.**  
 A high-performance, real-time PWA for campus food discovery and ordering.
-
----
-
-## App Architecture & Flow
-
-### Customer Journey
-```mermaid
-graph TD
-    A[Landing/Home] --> B[Browse Shops]
-    B --> C[Shop Profile]
-    C --> D[Menu Item Modal]
-    D --> E[Real-time Cart]
-    E --> F[Checkout]
-    F --> G[Order Receipt]
-    G --> H[Order History]
-```
-
-### Vendor Operations
-```mermaid
-graph LR
-    V[Vendor Login] --> D[Kitchen Dashboard]
-    D --> O[Live Order Tracking]
-    D --> M[Menu Management]
-    D --> S[Shop Settings]
-```
 
 ---
 

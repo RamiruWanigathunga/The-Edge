@@ -237,7 +237,7 @@ export default function CartPage() {
             </button>
             
             <p className="mt-4 text-[10px] text-muted-foreground text-center font-medium uppercase tracking-widest">
-              Secured by THE EDGE checkout
+              Secured by The Edge checkout
             </p>
           </div>
         </aside>

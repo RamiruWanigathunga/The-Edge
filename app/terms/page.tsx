@@ -14,7 +14,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-foreground mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using THE EDGE platform, you agree to be bound by these Terms and Conditions. 
+              By accessing and using The Edge platform, you agree to be bound by these Terms and Conditions. 
               Our services are designed to facilitate food ordering on campus.
             </p>
           </section>
@@ -38,7 +38,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-foreground mb-4">4. Privacy Policy</h2>
             <p>
-              Your use of THE EDGE is also governed by our Privacy Policy. We collect minimal data necessary 
+              Your use of The Edge is also governed by our Privacy Policy. We collect minimal data necessary 
                to provide the service and improve your experience.
             </p>
           </section>

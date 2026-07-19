@@ -141,7 +141,7 @@ export default function ShopRegistrationPage() {
           </div>
           <h1 className="text-3xl font-bold tracking-tight mb-3">Shop registration is closed</h1>
           <p className="text-muted-foreground leading-relaxed">
-            THE EDGE team is not accepting new shop requests right now. Existing approved vendors can still sell normally.
+            The Edge team is not accepting new shop requests right now. Existing approved vendors can still sell normally.
           </p>
           <Link href="/profile" className="pill bg-foreground text-background px-5 py-3 inline-flex mt-8">
             Back to profile
@@ -194,7 +194,7 @@ export default function ShopRegistrationPage() {
         <div className="label-mono mb-2">Register</div>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">List your shop</h1>
         <p className="text-muted-foreground mt-2">
-          Submit your details for manual approval. Only approved shops can sell on THE EDGE.
+          Submit your details for manual approval. Only approved shops can sell on The Edge.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">

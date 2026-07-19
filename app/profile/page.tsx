@@ -207,7 +207,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                       <div className="font-bold text-[16px]">Register your shop</div>
-                      <div className="text-[12px] text-muted-foreground font-medium">Start selling on THE EDGE today</div>
+                      <div className="text-[12px] text-muted-foreground font-medium">Start selling on The Edge today</div>
                     </div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />

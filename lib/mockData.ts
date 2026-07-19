@@ -1,4 +1,4 @@
-// Mock Data — THE EDGE
+// Mock Data — The Edge
 // TODO: Replace with Supabase queries — all data should be fetched from DB
 
 export type Shop = {

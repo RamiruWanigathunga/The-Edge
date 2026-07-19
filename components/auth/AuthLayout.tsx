@@ -58,7 +58,7 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
         >
           <header className="flex items-center justify-between">
             <Link href="/" className="text-xl font-bold tracking-tighter hover:opacity-80 transition-opacity">
-              THE EDGE
+              The Edge
             </Link>
           </header>
 
@@ -163,7 +163,7 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
               <div className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/30 dark:bg-white/5 text-[11px] text-muted-foreground leading-snug">
                 <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
                 <p>
-                  By continuing, you agree to THE EDGE&apos;s{" "}
+                  By continuing, you agree to The Edge&apos;s{" "}
                   <Link href="/terms" className="underline hover:text-foreground font-medium">Terms</Link> and{" "}
                   <Link href="/privacy" className="underline hover:text-foreground font-medium">Privacy Policy</Link>.
                 </p>
@@ -172,7 +172,7 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
           </main>
 
           <footer className="flex justify-between items-center text-[10px] text-muted-foreground/40 mt-auto pt-8">
-            <p>© 2026 THE EDGE · All rights reserved</p>
+            <p>© 2026 The Edge · All rights reserved</p>
             <Link href="/vendor/login" className="hover:text-foreground transition-colors flex items-center gap-1 font-medium uppercase tracking-widest">
               Vendor sign in <ArrowRight className="w-3 h-3" />
             </Link>

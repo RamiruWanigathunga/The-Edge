@@ -21,8 +21,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "THE EDGE",
-    template: "%s | THE EDGE",
+    default: "The Edge",
+    template: "%s | The Edge",
   },
   description:
     "Skip the queue at The Edge Canteen | NSBM Green University",
@@ -35,13 +35,13 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "THE EDGE",
+    title: "The Edge",
   },
   openGraph: {
-    title: "THE EDGE",
+    title: "The Edge",
     description: "Skip the queue at The Edge Canteen.",
     type: "website",
-    siteName: "THE EDGE",
+    siteName: "The Edge",
   },
 };
 

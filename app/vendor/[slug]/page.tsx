@@ -145,7 +145,7 @@ export default function VendorDashboard() {
         <div className="p-6 border-b border-border bg-card/50">
           <Link href="/" className="flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded-xl hero-gradient grid place-items-center text-white font-bold text-sm">E</div>
-            <span className="font-bold tracking-tight">THE EDGE</span>
+            <span className="font-bold tracking-tight">The Edge</span>
           </Link>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-secondary grid place-items-center text-2xl shadow-inner">{shop.emoji}</div>

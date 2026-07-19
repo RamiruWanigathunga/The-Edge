@@ -24,7 +24,7 @@ export default function VendorLoginPage() {
         >
           <header className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 group">
-              <span className="font-bold tracking-tighter text-xl">THE EDGE</span>
+              <span className="font-bold tracking-tighter text-xl">The Edge</span>
               <span className="px-2 py-0.5 rounded-md bg-secondary text-[10px] font-bold uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
                 Vendor
               </span>
@@ -59,7 +59,7 @@ export default function VendorLoginPage() {
           </main>
 
           <footer className="flex justify-between items-center text-[10px] text-muted-foreground/40 mt-auto pt-8">
-            <p>© 2026 THE EDGE · Vendor Services</p>
+            <p>© 2026 The Edge · Vendor Services</p>
             <div className="flex gap-6">
               <Link href="/terms" className="hover:text-foreground transition-colors uppercase tracking-widest font-medium">Terms</Link>
               <Link href="/auth" className="hover:text-foreground transition-colors uppercase tracking-widest font-medium">Customer Login</Link>

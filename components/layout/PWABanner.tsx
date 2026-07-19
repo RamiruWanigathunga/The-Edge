@@ -64,7 +64,7 @@ export const PWABanner = () => {
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-sm tracking-tight">Add to Home Screen</div>
           <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            Tap Install in the popup to add this as an app. No app store required.
+            Tap Install in the popup to add this as an app.
           </p>
         </div>
         <button

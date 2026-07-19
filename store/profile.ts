@@ -11,8 +11,8 @@ type ProfileState = {
 export const useProfile = create<ProfileState>()(
   persist(
     (set) => ({
-      name: "wenuja Jenkins",
-      email: "sarahjenkins22@gmail.com",
+      name: "Wenuja Liyanamana",
+      email: "wenujaweb@gmail.com",
       setName: (name) => set({ name }),
       setEmail: (email) => set({ email }),
     }),

@@ -22,7 +22,8 @@ import {
   useVendorSearch,
   useShopMenuItems,
   useSupabaseUser,
-  useVendorShop
+  useVendorShop,
+  useUpdateMenuItemDietaryTags
 } from "@/lib/supabase/hooks";
 import { useSignOut } from "@/lib/supabase/useSignOut";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export default function VendorDashboard() {
   const { data: user, isLoading: userLoading } = useSupabaseUser();
   const { data: shop, isLoading: shopLoading } = useVendorShop(slug, user?.id);
   const { data: menuItems = [] } = useShopMenuItems(shop?.id);
+  const updateDietaryTags = useUpdateMenuItemDietaryTags(shop?.id);
   const { signOut, isSigningOut } = useSignOut("/vendor/login");
   
   const [tab, setTab] = useState<Tab>("orders");
@@ -94,6 +96,19 @@ export default function VendorDashboard() {
       toast.success("Action undone");
     } catch (e) {
       toast.error("Failed to undo");
+    }
+  };
+
+  const toggleDietaryTag = async (menuItemId: string, currentTags: string[], tag: "Vegan" | "Vegetarian") => {
+    const nextTags = currentTags.includes(tag)
+      ? currentTags.filter((itemTag) => itemTag !== tag)
+      : [...currentTags, tag];
+
+    try {
+      await updateDietaryTags.mutateAsync({ menuItemId, dietaryTags: nextTags });
+      toast.success("Product tags updated");
+    } catch {
+      toast.error("Failed to update product tags");
     }
   };
 
@@ -379,8 +394,53 @@ export default function VendorDashboard() {
             </div>
           )}
 
+          {tab === "menu" && (
+            <div className="space-y-5">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">Menu items</h2>
+                <p className="text-sm text-muted-foreground mt-1">Mark products as vegan or vegetarian.</p>
+              </div>
+
+              <div className="grid gap-4">
+                {menuItems.map((item) => (
+                  <div key={item.id} className="rounded-3xl border border-border bg-card p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="min-w-0">
+                      <div className="font-bold tracking-tight truncate">{item.title}</div>
+                      <div className="text-sm text-muted-foreground mt-1">{item.category} · Rs {item.price.toFixed(0)}</div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {(["Vegan", "Vegetarian"] as const).map((tag) => {
+                        const active = item.dietaryTags.includes(tag);
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => toggleDietaryTag(item.id, item.dietaryTags, tag)}
+                            disabled={updateDietaryTags.isPending}
+                            className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-widest transition-smooth disabled:opacity-60 ${
+                              active
+                                ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300"
+                                : "border-border bg-secondary/50 text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {active && <Check className="mr-1.5 inline h-3.5 w-3.5" />}
+                            {tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+                {menuItems.length === 0 && (
+                  <EmptyState message="No menu items yet" icon={Utensils} />
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Other tabs remain placeholders for now or can be ported later */}
-          {tab !== "orders" && (
+          {tab !== "orders" && tab !== "menu" && (
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground italic">
                <p>Section &ldquo;{tab}&rdquo; under reconstruction for multi-shop flow.</p>
             </div>

@@ -46,13 +46,10 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   }, [pathname, router, isLoginPage, isSignupPage, isRegistrationPage, isVendorPage, isAuthPage]);
   
   const hideNav = isLoginPage || isSignupPage || isRegistrationPage || isVendorPage || isAuthPage;
+  const showFooter = pathname === "/" || pathname === "/profile";
 
   if (loading && !hideNav) {
-    return (
-      <div className="flex-1 bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
+    return <div className="flex-1 bg-background" />;
   }
 
   if (hideNav) {
@@ -71,7 +68,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         <main className="flex-1 flex flex-col">
           {children}
         </main>
-        <Footer />
+        {showFooter && <Footer />}
       </div>
       <BottomNav />
       <OfflineBanner />

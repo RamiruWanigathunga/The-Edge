@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 import { MenuItem } from "@/lib/mockData";
 
 export type CartEntry = {
@@ -42,118 +41,114 @@ type CartState = {
 };
 
 export const useCart = create<CartState>()(
-  persist(
-    (set, get) => ({
-      items: [],
-      favorites: [],
-      recentlyViewed: [],
+  (set, get) => ({
+    items: [],
+    favorites: [],
+    recentlyViewed: [],
 
-      add: (item, qty = 1, opts) => {
-        const state = get();
-        const existing = state.items.find((c) => c.item.id === item.id);
+    add: (item, qty = 1, opts) => {
+      const state = get();
+      const existing = state.items.find((c) => c.item.id === item.id);
         
-        let newItems: CartEntry[];
-        if (existing) {
-          newItems = state.items.map((c) =>
-            c.item.id === item.id
-              ? { 
-                  ...c, 
-                  qty: c.qty + qty, 
-                  notes: opts?.notes ?? c.notes,
-                  dining: opts?.dining ?? c.dining,
-                  scheduledSlot: opts?.scheduledSlot ?? c.scheduledSlot
-                }
-              : c
-          );
-        } else {
-          newItems = [
-            ...state.items,
-            {
-              item,
-              qty,
-              notes: opts?.notes,
-              dining: opts?.dining ?? "takeaway",
-              scheduledSlot: opts?.scheduledSlot ?? "ASAP",
-            },
-          ];
-        }
+      let newItems: CartEntry[];
+      if (existing) {
+        newItems = state.items.map((c) =>
+          c.item.id === item.id
+            ? {
+                ...c,
+                qty: c.qty + qty,
+                notes: opts?.notes ?? c.notes,
+                dining: opts?.dining ?? c.dining,
+                scheduledSlot: opts?.scheduledSlot ?? c.scheduledSlot,
+              }
+            : c
+        );
+      } else {
+        newItems = [
+          ...state.items,
+          {
+            item,
+            qty,
+            notes: opts?.notes,
+            dining: opts?.dining ?? "takeaway",
+            scheduledSlot: opts?.scheduledSlot ?? "ASAP",
+          },
+        ];
+      }
         
-        set({ items: newItems });
-      },
+      set({ items: newItems });
+    },
 
-      remove: (id) => {
-        const state = get();
-        set({ items: state.items.filter((c) => c.item.id !== id) });
-      },
+    remove: (id) => {
+      const state = get();
+      set({ items: state.items.filter((c) => c.item.id !== id) });
+    },
 
-      setQty: (id, qty) => {
-        const state = get();
-        const newItems = qty <= 0
-          ? state.items.filter((c) => c.item.id !== id)
-          : state.items.map((c) => (c.item.id === id ? { ...c, qty } : c));
+    setQty: (id, qty) => {
+      const state = get();
+      const newItems = qty <= 0
+        ? state.items.filter((c) => c.item.id !== id)
+        : state.items.map((c) => (c.item.id === id ? { ...c, qty } : c));
         
-        set({ items: newItems });
-      },
+      set({ items: newItems });
+    },
 
-      setNotes: (id, notes) => {
-        const state = get();
-        const newItems = state.items.map((c) => (c.item.id === id ? { ...c, notes } : c));
-        set({ items: newItems });
-      },
+    setNotes: (id, notes) => {
+      const state = get();
+      const newItems = state.items.map((c) => (c.item.id === id ? { ...c, notes } : c));
+      set({ items: newItems });
+    },
 
-      setDining: (id, dining) => {
-        const state = get();
-        const newItems = state.items.map((c) => (c.item.id === id ? { ...c, dining } : c));
-        set({ items: newItems });
-      },
+    setDining: (id, dining) => {
+      const state = get();
+      const newItems = state.items.map((c) => (c.item.id === id ? { ...c, dining } : c));
+      set({ items: newItems });
+    },
 
-      setScheduledSlot: (id, slot) => {
-        const state = get();
-        const newItems = state.items.map((c) => (c.item.id === id ? { ...c, scheduledSlot: slot } : c));
-        set({ items: newItems });
-      },
+    setScheduledSlot: (id, slot) => {
+      const state = get();
+      const newItems = state.items.map((c) => (c.item.id === id ? { ...c, scheduledSlot: slot } : c));
+      set({ items: newItems });
+    },
 
-      clear: () => {
-        set({ items: [] });
-      },
+    clear: () => {
+      set({ items: [] });
+    },
 
-      clearShop: (shopId) => {
-        const state = get();
-        set({ items: state.items.filter(i => i.item.shopId !== shopId) });
-      },
+    clearShop: (shopId) => {
+      const state = get();
+      set({ items: state.items.filter((i) => i.item.shopId !== shopId) });
+    },
 
-      toggleFav: (id) => {
-        const state = get();
-        const isFav = state.favorites.includes(id);
-        const newFavs = isFav
-          ? state.favorites.filter((f) => f !== id)
-          : [...state.favorites, id];
+    toggleFav: (id) => {
+      const state = get();
+      const isFav = state.favorites.includes(id);
+      const newFavs = isFav
+        ? state.favorites.filter((f) => f !== id)
+        : [...state.favorites, id];
         
-        set({ favorites: newFavs });
-      },
+      set({ favorites: newFavs });
+    },
 
-      addRecentlyViewed: (shopId) =>
-        set((s) => {
-          const filtered = s.recentlyViewed.filter((id) => id !== shopId);
-          return { recentlyViewed: [shopId, ...filtered].slice(0, 5) };
-        }),
+    addRecentlyViewed: (shopId) =>
+      set((s) => {
+        const filtered = s.recentlyViewed.filter((id) => id !== shopId);
+        return { recentlyViewed: [shopId, ...filtered].slice(0, 5) };
+      }),
 
-      count: () => get().items.reduce((n, c) => n + c.qty, 0),
+    count: () => get().items.reduce((n, c) => n + c.qty, 0),
 
-      total: () =>
-        get().items.reduce((n, c) => n + c.qty * c.item.price, 0),
+    total: () =>
+      get().items.reduce((n, c) => n + c.qty * c.item.price, 0),
 
-      groupedByShop: () => {
-        const map = new Map<string, CartEntry[]>();
-        get().items.forEach((c) => {
-          const arr = map.get(c.item.shopId) ?? [];
-          arr.push(c);
-          map.set(c.item.shopId, arr);
-        });
-        return map;
-      },
-    }),
-    { name: "edge-cart-v3" } // Bumped version for schema change
-  )
+    groupedByShop: () => {
+      const map = new Map<string, CartEntry[]>();
+      get().items.forEach((c) => {
+        const arr = map.get(c.item.shopId) ?? [];
+        arr.push(c);
+        map.set(c.item.shopId, arr);
+      });
+      return map;
+    },
+  })
 );
-

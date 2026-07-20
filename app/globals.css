@@ -196,7 +196,7 @@
   }
 
   .label-mono {
-    @apply font-mono uppercase text-xs tracking-[0.12em] text-muted-foreground;
+    @apply font-medium uppercase text-xs tracking-widest text-muted-foreground;
   }
 
   .glass-light {

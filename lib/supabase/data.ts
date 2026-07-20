@@ -303,6 +303,18 @@ export async function fetchMenuItemsByShop(shopId: string): Promise<MenuItem[]> 
   return ((data ?? []) as MenuItemRow[]).map(mapMenuItem);
 }
 
+export async function updateMenuItemDietaryTags(menuItemId: string, dietaryTags: string[]) {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return;
+
+  const { error } = await supabase
+    .from("menu_items")
+    .update({ dietary_tags: dietaryTags })
+    .eq("id", menuItemId);
+
+  if (error) throw error;
+}
+
 // ---------------------------------------------------------------------------
 // ORDER CREATION (via server-side RPC)
 // ---------------------------------------------------------------------------

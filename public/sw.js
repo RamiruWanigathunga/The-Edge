@@ -1,5 +1,10 @@
-const CACHE_NAME = "the-edge-shell-v1";
-const SHELL_ASSETS = ["/", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
+const CACHE_NAME = "the-edge-shell-v2";
+const SHELL_ASSETS = [
+  "/",
+  "/manifest.json",
+  "/icons/icon-192-transparent.png",
+  "/icons/icon-512-transparent.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

@@ -195,27 +195,6 @@ export default function ProfilePage() {
             </section>
 
             <section>
-              <h3 className="label-mono mb-4 ml-2">Shop Owner?</h3>
-              <Link 
-                href="/shop-registration"
-                className="block bg-primary/5 border border-primary/10 rounded-3xl p-6 hover:bg-primary/10 transition-all group"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center">
-                      <Crown className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-[16px]">Register your shop</div>
-                      <div className="text-[12px] text-muted-foreground font-medium">Start selling on The Edge today</div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            </section>
-
-            <section>
               <h3 className="label-mono mb-4 ml-2">Preferences</h3>
               <div className="bg-white dark:bg-card border border-border rounded-[2.5rem] overflow-hidden shadow-soft">
                 {[

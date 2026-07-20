@@ -4,21 +4,21 @@
   "description": "Skip the queue at The Edge Canteen",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0CC167",
+  "background_color": "#0BC167",
   "theme_color": "#0BC167",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/icon-192-transparent.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/icon-512-transparent.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ],
   "categories": ["food", "ordering", "shopping"],

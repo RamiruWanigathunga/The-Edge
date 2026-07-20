@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Heart, Plus } from "lucide-react";
+import { Check, Heart, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { MenuItem } from "@/lib/mockData";
 import { useCart } from "@/store/cart";
-import { useShopById } from "@/lib/supabase/hooks";
+import { useServerFavorites, useShopById, useSupabaseUser, useToggleFavorite } from "@/lib/supabase/hooks";
 
 interface FoodCardProps {
   item: MenuItem;
@@ -14,9 +15,47 @@ interface FoodCardProps {
 }
 
 export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => {
-  const { add, favorites, toggleFav } = useCart();
-  const fav = favorites.includes(item.id);
+  const { add, items, remove } = useCart();
+  const { data: user } = useSupabaseUser();
+  const userId = user?.id;
+  const { data: favorites = [] } = useServerFavorites(userId);
+  const toggleFavorite = useToggleFavorite();
+  const serverFav = favorites.includes(item.id);
+  const [optimisticFav, setOptimisticFav] = useState<boolean | null>(null);
+  const [selectedQty, setSelectedQty] = useState(1);
+  const fav = optimisticFav ?? serverFav;
   const { data: shop } = useShopById(item.shopId);
+  const isInCart = items.some((cartItem) => cartItem.item.id === item.id);
+  const dietLabel = item.dietaryTags.find((tag) => {
+    const normalized = tag.toLowerCase();
+    return normalized === "vegan" || normalized === "vegetarian";
+  });
+
+  useEffect(() => {
+    setOptimisticFav(null);
+  }, [serverFav]);
+
+  const handleFavorite = () => {
+    if (!userId) {
+      toast.error("Please sign in to save favorites");
+      return;
+    }
+
+    const nextFav = !fav;
+    setOptimisticFav(nextFav);
+    toggleFavorite.mutate(
+      { userId, menuItemId: item.id, isFavorite: fav },
+      {
+        onSuccess: () => {
+          toast(nextFav ? "Added to favorites" : "Removed from favorites");
+        },
+        onError: () => {
+          setOptimisticFav(null);
+          toast.error("Could not update favorites");
+        },
+      }
+    );
+  };
 
   return (
     <article className="group relative transition-smooth hover:shadow-elevated rounded-3xl cursor-default">
@@ -32,24 +71,6 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
             className="object-cover transition-smooth group-hover:scale-[1.04] will-change-transform"
           />
 
-          {/* Fav button */}
-          <button
-            id={`fav-btn-${item.id}`}
-            onClick={(e) => {
-              e.preventDefault();
-              toggleFav(item.id);
-              toast(fav ? "Removed from favorites" : "Added to favorites");
-            }}
-            aria-label={fav ? "Remove from favorites" : "Add to favorites"}
-            className="absolute top-3 right-3 w-9 h-9 rounded-full glass-light grid place-items-center focus-dashed transition-smooth hover:scale-110"
-          >
-            <Heart
-              className={`w-4 h-4 ${
-                fav ? "fill-destructive text-destructive" : "text-white"
-              }`}
-            />
-          </button>
-
           {/* Badges removed per user request */}
           {!item.isAvailable && (
             <div className="absolute inset-0 bg-background/60 backdrop-blur-sm grid place-items-center">
@@ -63,9 +84,29 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
         {/* Content */}
         <div className="p-4 flex-1 flex flex-col">
           <div className="min-w-0 mb-3">
-            <h3 className="font-bold text-base tracking-tight truncate leading-tight">{item.title}</h3>
+            <div className="flex items-start gap-2">
+              <h3 className="min-w-0 flex-1 font-bold text-base tracking-tight truncate leading-tight">{item.title}</h3>
+              <button
+                id={`fav-btn-${item.id}`}
+                onClick={handleFavorite}
+                disabled={toggleFavorite.isPending}
+                aria-label={fav ? "Remove from favorites" : "Add to favorites"}
+                className="w-8 h-8 rounded-full grid place-items-center focus-dashed transition-smooth hover:bg-secondary disabled:opacity-60 shrink-0"
+              >
+                <Heart
+                  className={`w-5 h-5 ${
+                    fav ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                  }`}
+                />
+              </button>
+            </div>
             {(shopName || shop) && (
               <p className="text-sm text-muted-foreground mt-0.5 truncate">{shopName ?? shop?.name}</p>
+            )}
+            {dietLabel && (
+              <span className="mt-2 inline-flex w-fit rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
+                {dietLabel}
+              </span>
             )}
           </div>
 
@@ -74,18 +115,50 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
               Rs {item.price.toFixed(0)}
             </div>
             
-            <button
-              id={`add-to-cart-${item.id}`}
-              onClick={() => {
-                if (!item.isAvailable) return;
-                add(item);
-                toast.success(`${item.title} added to cart`);
-              }}
-              disabled={!item.isAvailable}
-              className="w-10 h-10 md:w-8 md:h-8 rounded-full bg-[#3AD07A] dark:bg-[#2DAA63] text-white grid place-items-center hover:scale-105 transition-smooth shadow-sm focus-dashed disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer"
-            >
-              <Plus className="w-6 h-6 md:w-5 md:h-5 stroke-[3px]" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex h-9 items-center rounded-full bg-secondary text-foreground border border-border overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setSelectedQty((qty) => Math.max(1, qty - 1))}
+                  className="w-8 h-9 grid place-items-center hover:bg-background transition-smooth focus-dashed disabled:opacity-40"
+                  disabled={selectedQty <= 1}
+                  aria-label="Decrease quantity"
+                >
+                  <Minus className="w-3.5 h-3.5 stroke-[3px]" />
+                </button>
+                <span className="min-w-6 text-center text-sm font-bold">{selectedQty}</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedQty((qty) => qty + 1)}
+                  className="w-8 h-9 grid place-items-center hover:bg-background transition-smooth focus-dashed"
+                  aria-label="Increase quantity"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[3px]" />
+                </button>
+              </div>
+              <button
+                id={`add-to-cart-${item.id}`}
+                onClick={() => {
+                  if (!item.isAvailable) return;
+                  if (isInCart) {
+                    remove(item.id);
+                    setSelectedQty(1);
+                    toast.success(`${item.title} removed from cart`);
+                    return;
+                  }
+                  add(item, selectedQty);
+                  toast.success(`${selectedQty} ${item.title} added to cart`);
+                }}
+                disabled={!item.isAvailable}
+                className="w-10 h-10 md:w-8 md:h-8 rounded-full bg-[#3AD07A] dark:bg-[#2DAA63] text-white grid place-items-center hover:scale-105 transition-smooth shadow-sm focus-dashed disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {isInCart ? (
+                  <Check className="w-6 h-6 md:w-5 md:h-5 stroke-[3px]" />
+                ) : (
+                  <Plus className="w-6 h-6 md:w-5 md:h-5 stroke-[3px]" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

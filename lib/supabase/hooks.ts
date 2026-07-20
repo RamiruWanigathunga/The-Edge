@@ -22,6 +22,7 @@ import {
   fetchVendorOrders,
   searchVendorOrders,
   updateOrderStatus as updateOrderStatusFn,
+  updateMenuItemDietaryTags,
   type CreateOrderParams,
 } from "@/lib/supabase/data";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -96,6 +97,20 @@ export function useShopMenuItems(shopId?: string) {
     queryKey: ["shop-menu-items", shopId],
     queryFn: () => fetchMenuItemsByShop(shopId!),
     enabled: Boolean(shopId),
+  });
+}
+
+export function useUpdateMenuItemDietaryTags(shopId?: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ menuItemId, dietaryTags }: { menuItemId: string; dietaryTags: string[] }) =>
+      updateMenuItemDietaryTags(menuItemId, dietaryTags),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shop-menu-items", shopId] });
+      queryClient.invalidateQueries({ queryKey: ["menu-items"] });
+      queryClient.invalidateQueries({ queryKey: ["all-menu-items"] });
+    },
   });
 }
 

@@ -24,15 +24,15 @@ export default function CartPage() {
       <div className="flex-1 bg-background flex flex-col">
         <div className="flex-1 container mx-auto px-4 py-20 md:pt-36 text-center">
           <div className="w-24 h-24 bg-secondary/50 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">🛒</div>
-          <h1 className="text-3xl font-bold tracking-tight">Your cart is empty</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Add items to start a cart</h1>
           <p className="text-muted-foreground mt-2 max-w-sm mx-auto">
             Add a few things from the menu to see them here. Each shop prepares your order separately.
           </p>
           <Link
-            href="/"
+            href="/browse"
             className="inline-flex mt-8 pill bg-foreground text-background px-10 py-4 font-bold focus-dashed hover:bg-foreground/90 transition-smooth shadow-pop"
           >
-            Explore Menu
+            Start shopping
           </Link>
         </div>
       </div>
@@ -44,7 +44,9 @@ export default function CartPage() {
       <div className="flex-1 container mx-auto px-4 pt-8 pb-24 md:pb-32 md:pt-28 grid lg:grid-cols-[1fr_380px] gap-12">
         {/* Left: cart items */}
         <div className="min-w-0">
-          <div className="label-mono mb-2 text-primary">● Multi-shop cart</div>
+          <div className="label-mono mb-2 text-primary">
+            ● {groupedEntries.length > 1 ? "Multi-shop cart" : "Shop cart"}
+          </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Review Order</h1>
           <p className="text-muted-foreground mt-1 text-sm max-w-lg">
             Items are grouped by shop. Each shop requires its own payment and will issue a unique pickup code.

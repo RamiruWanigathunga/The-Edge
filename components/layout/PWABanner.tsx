@@ -15,6 +15,10 @@ export const PWABanner = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      return;
+    }
+
     // Check if the app is already installed/running as a standalone PWA
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches || 
       ("standalone" in navigator && (navigator as any).standalone === true);
@@ -81,7 +85,7 @@ export const PWABanner = () => {
 
   return (
     <div 
-      className={`fixed bottom-20 md:bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-[340px] z-[60] animate-slide-in-right transition-all duration-300 ${closing ? "opacity-0 translate-x-8" : "opacity-100"}`}
+      className={`fixed bottom-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-[340px] md:hidden z-[60] animate-slide-in-right transition-all duration-300 ${closing ? "opacity-0 translate-x-8" : "opacity-100"}`}
     >
       <div className="bg-card border border-border rounded-3xl p-4 shadow-elevated flex items-start gap-3">
         <button

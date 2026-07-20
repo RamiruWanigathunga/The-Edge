@@ -3,11 +3,11 @@
 import { Heart } from "lucide-react";
 import Link from "next/link";
 import { FoodCard } from "@/components/shop/FoodCard";
-import { useCart } from "@/store/cart";
-import { useAllMenuItems } from "@/lib/supabase/hooks";
+import { useAllMenuItems, useServerFavorites, useSupabaseUser } from "@/lib/supabase/hooks";
 
 export default function FavoritesPage() {
-  const { favorites } = useCart();
+  const { data: user } = useSupabaseUser();
+  const { data: favorites = [] } = useServerFavorites(user?.id);
   const { data: allItems = [] } = useAllMenuItems();
   
   const favItems = allItems.filter((i) => favorites.includes(i.id));

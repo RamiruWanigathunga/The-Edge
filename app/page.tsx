@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation";
 import { PWABanner } from "@/components/layout/PWABanner";
 import { ShopCard } from "@/components/shop/ShopCard";
 import { FoodCard } from "@/components/shop/FoodCard";
-import { useMenuItems, useShops } from "@/lib/supabase/hooks";
-import { useCart } from "@/store/cart";
+import { useMenuItems, useServerFavorites, useShops, useSupabaseUser } from "@/lib/supabase/hooks";
 import { useProfile } from "@/store/profile";
 import { NotificationLink } from "@/components/layout/NotificationLink";
 
@@ -17,7 +16,8 @@ export default function HomePage() {
   const router = useRouter();
   const { data: shops = [] } = useShops();
   const { data: items = [] } = useMenuItems();
-  const { favorites } = useCart();
+  const { data: user } = useSupabaseUser();
+  const { data: favorites = [] } = useServerFavorites(user?.id);
   const { name } = useProfile();
 
   const greeting = useMemo(() => {

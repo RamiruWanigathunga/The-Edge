@@ -67,7 +67,6 @@ export const Header = () => {
         {/* Right actions */}
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-3">
-            <NotificationLink className="w-8 h-8 translate-y-0.5 hover:opacity-70" iconClassName="w-6 h-6" />
             <Link
               href="/cart"
               id="header-cart-btn"
@@ -84,6 +83,7 @@ export const Header = () => {
                 </span>
               )}
             </Link>
+            <NotificationLink className="w-8 h-8 translate-y-0.5 hover:opacity-70" iconClassName="w-6 h-6" />
             <Link
               href="/profile"
               className="w-8 h-8 overflow-hidden hover:opacity-70 transition-smooth focus-dashed flex items-center justify-center"

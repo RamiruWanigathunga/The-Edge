@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Home, Compass, ShoppingBag, ReceiptText, User } from "lucide-react";
 import { useCart } from "@/store/cart";
@@ -41,18 +40,18 @@ export const BottomNav = () => {
               <div className="relative">
                 {link.label === "Cart" ? (
                   <div className={`relative w-7 h-7 transition-all ${isActive ? "drop-shadow-[0_0_8px_rgba(34,197,94,0.5)] brightness-150" : ""}`}>
-                    <Image src="/icons/cart-black.svg" alt="Cart" fill className="dark:hidden object-contain" />
-                    <Image src="/icons/cart-white.svg" alt="Cart" fill className="hidden dark:block object-contain" />
+                    <img src="/icons/cart-black.svg" alt="Cart" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
+                    <img src="/icons/cart-white.svg" alt="Cart" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
                   </div>
                 ) : link.label === "Profile" ? (
                   <div className={`relative w-7 h-7 transition-all ${isActive ? "drop-shadow-[0_0_8px_rgba(34,197,94,0.5)] brightness-150" : ""}`}>
-                    <Image src="/images/profile-black.svg" alt="Profile" fill className="dark:hidden object-contain" />
-                    <Image src="/images/profile-white.svg" alt="Profile" fill className="hidden dark:block object-contain" />
+                    <img src="/images/profile-black.svg" alt="Profile" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
+                    <img src="/images/profile-white.svg" alt="Profile" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
                   </div>
                 ) : link.label === "Home" ? (
                   <div className={`relative w-7 h-7 transition-all ${isActive ? "drop-shadow-[0_0_8px_rgba(34,197,94,0.5)] brightness-150" : ""}`}>
-                    <Image src="/icons/home-black.svg" alt="Home" fill className="dark:hidden object-contain" />
-                    <Image src="/icons/home-white.svg" alt="Home" fill className="hidden dark:block object-contain" />
+                    <img src="/icons/home-black.svg" alt="Home" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
+                    <img src="/icons/home-white.svg" alt="Home" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
                   </div>
                 ) : (
                   <Icon

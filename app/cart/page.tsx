@@ -25,8 +25,8 @@ export default function CartPage() {
         <div className="flex-1 container mx-auto px-4 py-20 md:pt-36 text-center">
           <div className="w-24 h-24 bg-secondary/50 rounded-full flex items-center justify-center mx-auto mb-6">
             <div className="relative w-10 h-10">
-              <Image src="/icons/cart-new-black.svg" alt="" fill className="dark:hidden object-contain" />
-              <Image src="/icons/cart-new-white.svg" alt="" fill className="hidden dark:block object-contain" />
+              <img src="/icons/cart-new-black.svg" alt="" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
+              <img src="/icons/cart-new-white.svg" alt="" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
             </div>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Add items to start a cart</h1>

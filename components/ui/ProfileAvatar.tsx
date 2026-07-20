@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 
 /**
  * Standard Profile Avatar component.
@@ -12,17 +11,19 @@ export function ProfileAvatar({ className = "", iconSize = 20 }: { className?: s
     <div 
       className={`relative flex items-center justify-center profile-avatar overflow-hidden ${className}`}
     >
-      <Image
+      <img
         src="/images/profile-black.svg"
         alt="Profile"
-        fill
-        className="object-cover dark:hidden"
+        className="w-full h-full object-cover dark:hidden"
+        loading="eager"
+        decoding="sync"
       />
-      <Image
+      <img
         src="/images/profile-white.svg"
         alt="Profile"
-        fill
-        className="object-cover hidden dark:block"
+        className="hidden w-full h-full object-cover dark:block"
+        loading="eager"
+        decoding="sync"
       />
     </div>
   );

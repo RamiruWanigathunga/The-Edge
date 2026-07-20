@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
 import { useSupabaseUser, useUserOrders } from "@/lib/supabase/hooks";
@@ -39,8 +38,8 @@ export function NotificationLink({
       className={`relative flex items-center justify-center transition-smooth focus-dashed ${className}`}
     >
       <span className={`relative block ${iconClassName}`}>
-        <Image src={lightIcon} alt="" fill sizes="24px" className="dark:hidden object-contain" />
-        <Image src={darkIcon} alt="" fill sizes="24px" className="hidden dark:block object-contain" />
+        <img src={lightIcon} alt="" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
+        <img src={darkIcon} alt="" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
       </span>
     </Link>
   );

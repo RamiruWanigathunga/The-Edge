@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/store/cart";
 import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
@@ -74,8 +73,8 @@ export const Header = () => {
               className="relative flex w-8 h-8 items-center justify-center text-muted-foreground transition-smooth focus-dashed"
             >
               <div className="relative w-6 h-6 translate-y-px hover:opacity-70 transition-smooth">
-                <Image src="/icons/cart-black.svg" alt="Cart" fill className="dark:hidden object-contain" />
-                <Image src="/icons/cart-white.svg" alt="Cart" fill className="hidden dark:block object-contain" />
+                <img src="/icons/cart-black.svg" alt="Cart" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
+                <img src="/icons/cart-white.svg" alt="Cart" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
               </div>
               {mounted && count > 0 && (
                 <span className="absolute -top-2 -right-2 inline-grid place-items-center min-w-5 h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold animate-scale-in">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Heart, Plus } from "lucide-react";
+import { Check, Heart, Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { MenuItem } from "@/lib/mockData";
 import { useCart } from "@/store/cart";
@@ -15,15 +15,17 @@ interface FoodCardProps {
 }
 
 export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => {
-  const { add } = useCart();
+  const { add, items, remove } = useCart();
   const { data: user } = useSupabaseUser();
   const userId = user?.id;
   const { data: favorites = [] } = useServerFavorites(userId);
   const toggleFavorite = useToggleFavorite();
   const serverFav = favorites.includes(item.id);
   const [optimisticFav, setOptimisticFav] = useState<boolean | null>(null);
+  const [selectedQty, setSelectedQty] = useState(1);
   const fav = optimisticFav ?? serverFav;
   const { data: shop } = useShopById(item.shopId);
+  const isInCart = items.some((cartItem) => cartItem.item.id === item.id);
 
   useEffect(() => {
     setOptimisticFav(null);
@@ -104,18 +106,49 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
               Rs {item.price.toFixed(0)}
             </div>
             
-            <button
-              id={`add-to-cart-${item.id}`}
-              onClick={() => {
-                if (!item.isAvailable) return;
-                add(item);
-                toast.success(`${item.title} added to cart`);
-              }}
-              disabled={!item.isAvailable}
-              className="w-10 h-10 md:w-8 md:h-8 rounded-full bg-[#3AD07A] dark:bg-[#2DAA63] text-white grid place-items-center hover:scale-105 transition-smooth shadow-sm focus-dashed disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer"
-            >
-              <Plus className="w-6 h-6 md:w-5 md:h-5 stroke-[3px]" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="flex h-9 items-center rounded-full bg-secondary text-foreground border border-border overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setSelectedQty((qty) => Math.max(1, qty - 1))}
+                  className="w-8 h-9 grid place-items-center hover:bg-background transition-smooth focus-dashed disabled:opacity-40"
+                  disabled={selectedQty <= 1}
+                  aria-label="Decrease quantity"
+                >
+                  <Minus className="w-3.5 h-3.5 stroke-[3px]" />
+                </button>
+                <span className="min-w-6 text-center text-sm font-bold">{selectedQty}</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedQty((qty) => qty + 1)}
+                  className="w-8 h-9 grid place-items-center hover:bg-background transition-smooth focus-dashed"
+                  aria-label="Increase quantity"
+                >
+                  <Plus className="w-3.5 h-3.5 stroke-[3px]" />
+                </button>
+              </div>
+              <button
+                id={`add-to-cart-${item.id}`}
+                onClick={() => {
+                  if (!item.isAvailable) return;
+                  if (isInCart) {
+                    remove(item.id);
+                    toast.success(`${item.title} removed from cart`);
+                    return;
+                  }
+                  add(item, selectedQty);
+                  toast.success(`${selectedQty} ${item.title} added to cart`);
+                }}
+                disabled={!item.isAvailable}
+                className="w-10 h-10 md:w-8 md:h-8 rounded-full bg-[#3AD07A] dark:bg-[#2DAA63] text-white grid place-items-center hover:scale-105 transition-smooth shadow-sm focus-dashed disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {isInCart ? (
+                  <Check className="w-6 h-6 md:w-5 md:h-5 stroke-[3px]" />
+                ) : (
+                  <Plus className="w-6 h-6 md:w-5 md:h-5 stroke-[3px]" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

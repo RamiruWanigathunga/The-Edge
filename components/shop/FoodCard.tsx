@@ -1,11 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Heart, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { MenuItem } from "@/lib/mockData";
 import { useCart } from "@/store/cart";
-import { useShopById } from "@/lib/supabase/hooks";
+import { useServerFavorites, useShopById, useSupabaseUser, useToggleFavorite } from "@/lib/supabase/hooks";
 
 interface FoodCardProps {
   item: MenuItem;
@@ -14,9 +15,41 @@ interface FoodCardProps {
 }
 
 export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => {
-  const { add, favorites, toggleFav } = useCart();
-  const fav = favorites.includes(item.id);
+  const { add } = useCart();
+  const { data: user } = useSupabaseUser();
+  const userId = user?.id;
+  const { data: favorites = [] } = useServerFavorites(userId);
+  const toggleFavorite = useToggleFavorite();
+  const serverFav = favorites.includes(item.id);
+  const [optimisticFav, setOptimisticFav] = useState<boolean | null>(null);
+  const fav = optimisticFav ?? serverFav;
   const { data: shop } = useShopById(item.shopId);
+
+  useEffect(() => {
+    setOptimisticFav(null);
+  }, [serverFav]);
+
+  const handleFavorite = () => {
+    if (!userId) {
+      toast.error("Please sign in to save favorites");
+      return;
+    }
+
+    const nextFav = !fav;
+    setOptimisticFav(nextFav);
+    toggleFavorite.mutate(
+      { userId, menuItemId: item.id, isFavorite: fav },
+      {
+        onSuccess: () => {
+          toast(nextFav ? "Added to favorites" : "Removed from favorites");
+        },
+        onError: () => {
+          setOptimisticFav(null);
+          toast.error("Could not update favorites");
+        },
+      }
+    );
+  };
 
   return (
     <article className="group relative transition-smooth hover:shadow-elevated rounded-3xl cursor-default">
@@ -32,24 +65,6 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
             className="object-cover transition-smooth group-hover:scale-[1.04] will-change-transform"
           />
 
-          {/* Fav button */}
-          <button
-            id={`fav-btn-${item.id}`}
-            onClick={(e) => {
-              e.preventDefault();
-              toggleFav(item.id);
-              toast(fav ? "Removed from favorites" : "Added to favorites");
-            }}
-            aria-label={fav ? "Remove from favorites" : "Add to favorites"}
-            className="absolute top-3 right-3 w-9 h-9 rounded-full glass-light grid place-items-center focus-dashed transition-smooth hover:scale-110"
-          >
-            <Heart
-              className={`w-4 h-4 ${
-                fav ? "fill-destructive text-destructive" : "text-white"
-              }`}
-            />
-          </button>
-
           {/* Badges removed per user request */}
           {!item.isAvailable && (
             <div className="absolute inset-0 bg-background/60 backdrop-blur-sm grid place-items-center">
@@ -63,7 +78,22 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
         {/* Content */}
         <div className="p-4 flex-1 flex flex-col">
           <div className="min-w-0 mb-3">
-            <h3 className="font-bold text-base tracking-tight truncate leading-tight">{item.title}</h3>
+            <div className="flex items-start gap-2">
+              <h3 className="min-w-0 flex-1 font-bold text-base tracking-tight truncate leading-tight">{item.title}</h3>
+              <button
+                id={`fav-btn-${item.id}`}
+                onClick={handleFavorite}
+                disabled={toggleFavorite.isPending}
+                aria-label={fav ? "Remove from favorites" : "Add to favorites"}
+                className="w-7 h-7 rounded-full grid place-items-center focus-dashed transition-smooth hover:bg-secondary disabled:opacity-60 shrink-0"
+              >
+                <Heart
+                  className={`w-4 h-4 ${
+                    fav ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                  }`}
+                />
+              </button>
+            </div>
             {(shopName || shop) && (
               <p className="text-sm text-muted-foreground mt-0.5 truncate">{shopName ?? shop?.name}</p>
             )}

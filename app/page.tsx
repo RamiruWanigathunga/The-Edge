@@ -34,6 +34,10 @@ export default function HomePage() {
 
   const mostOrdered = useMemo(() => items.filter((i) => i.popular && i.isAvailable), [items]);
   const recentlyOrdered = useMemo(() => items.slice(0, 6), [items]); 
+  const todaysShops = useMemo(
+    () => [...shops].sort((a, b) => Number(b.isOpen) - Number(a.isOpen)),
+    [shops]
+  );
   
   const favouriteItems = useMemo(() => items.filter((i) => favorites.includes(i.id)), [items, favorites]);
 
@@ -115,8 +119,8 @@ export default function HomePage() {
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Today&apos;s shops</h2>
         </div>
         <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide -mx-4 pt-2 pb-8 scroll-pl-4 scroll-pr-4">
-          {shops.map((s, index) => (
-            <div key={s.id} className={`w-[260px] shrink-0 snap-start ${index === 0 ? 'ml-4' : ''} ${index === shops.length - 1 ? 'mr-4' : ''}`}>
+          {todaysShops.map((s, index) => (
+            <div key={s.id} className={`w-[260px] shrink-0 snap-start ${index === 0 ? 'ml-4' : ''} ${index === todaysShops.length - 1 ? 'mr-4' : ''}`}>
               <ShopCard shop={s} />
             </div>
           ))}

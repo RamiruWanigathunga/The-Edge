@@ -83,7 +83,7 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
 
         {/* Content */}
         <div className="p-4 flex-1 flex flex-col">
-          <div className="min-w-0 mb-3">
+          <div className="min-w-0 mb-2">
             <div className="flex items-start gap-2">
               <h3 className="min-w-0 flex-1 font-bold text-base tracking-tight truncate leading-tight">{item.title}</h3>
               <button
@@ -100,27 +100,29 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
                 />
               </button>
             </div>
+            <div className="h-5 -mt-0.5">
+              {dietLabel && (
+                <span className="inline-flex w-fit rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
+                  {dietLabel}
+                </span>
+              )}
+            </div>
             {(shopName || shop) && (
               <p className="text-sm text-muted-foreground mt-0.5 truncate">{shopName ?? shop?.name}</p>
             )}
-            {dietLabel && (
-              <span className="mt-2 inline-flex w-fit rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
-                {dietLabel}
-              </span>
-            )}
           </div>
 
-          <div className="flex items-center justify-between mt-auto">
-            <div className="font-bold text-xl tracking-tight">
+          <div className="flex items-center justify-between gap-3 mt-auto pt-2">
+            <div className="font-bold text-lg tracking-tight leading-none">
               Rs {item.price.toFixed(0)}
             </div>
             
             <div className="flex items-center gap-2 shrink-0">
-              <div className="flex h-9 items-center rounded-full bg-secondary text-foreground border border-border overflow-hidden">
+              <div className="flex h-8 items-center rounded-full bg-secondary text-foreground border border-border overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setSelectedQty((qty) => Math.max(1, qty - 1))}
-                  className="w-8 h-9 grid place-items-center hover:bg-background transition-smooth focus-dashed disabled:opacity-40"
+                  className="w-7 h-8 grid place-items-center hover:bg-background transition-smooth focus-dashed disabled:opacity-40"
                   disabled={selectedQty <= 1}
                   aria-label="Decrease quantity"
                 >
@@ -130,7 +132,7 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
                 <button
                   type="button"
                   onClick={() => setSelectedQty((qty) => qty + 1)}
-                  className="w-8 h-9 grid place-items-center hover:bg-background transition-smooth focus-dashed"
+                  className="w-7 h-8 grid place-items-center hover:bg-background transition-smooth focus-dashed"
                   aria-label="Increase quantity"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[3px]" />
@@ -150,7 +152,7 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
                   toast.success(`${selectedQty} ${item.title} added to cart`);
                 }}
                 disabled={!item.isAvailable}
-                className="w-10 h-10 md:w-8 md:h-8 rounded-full bg-[#3AD07A] dark:bg-[#2DAA63] text-white grid place-items-center hover:scale-105 transition-smooth shadow-sm focus-dashed disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-9 h-9 md:w-8 md:h-8 rounded-full bg-[#3AD07A] dark:bg-[#2DAA63] text-white grid place-items-center hover:scale-105 transition-smooth shadow-sm focus-dashed disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isInCart ? (
                   <Check className="w-6 h-6 md:w-5 md:h-5 stroke-[3px]" />

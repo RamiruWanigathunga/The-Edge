@@ -270,7 +270,7 @@ function BrowseContent() {
               <div className="text-sm text-muted-foreground mb-4">
                 {filtered.length} item{filtered.length !== 1 ? "s" : ""} found
               </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {visibleItems.map((i, idx) => (
                   <motion.div
                     key={i.id}

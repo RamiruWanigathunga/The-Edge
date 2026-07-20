@@ -83,7 +83,7 @@ export default function ProfilePage() {
           
           {/* ── LEFT COLUMN (Profile Info) ── */}
           <aside className="w-full md:w-80 shrink-0">
-            <div className="bg-white dark:bg-card border border-border rounded-[2.5rem] p-8 shadow-soft sticky top-24 overflow-hidden">
+            <div className="bg-white dark:bg-card border border-border rounded-[2.5rem] p-8 sticky top-24 overflow-hidden">
               {/* Tier Background Glow */}
               <div className={`absolute -top-12 -right-12 w-32 h-32 blur-3xl opacity-20 rounded-full ${tierInfo.bg}`} />
               
@@ -92,7 +92,7 @@ export default function ProfilePage() {
                   <div className="w-32 h-32 overflow-hidden flex items-center justify-center">
                     <ProfileAvatar className="w-full h-full" iconSize={64} />
                   </div>
-                  <div className={`absolute -bottom-1 -right-1 w-10 h-10 rounded-full bg-white dark:bg-card border border-border flex items-center justify-center shadow-md ${tierInfo.color}`}>
+                  <div className={`absolute -bottom-1 -right-1 w-10 h-10 rounded-full bg-white dark:bg-card border border-border flex items-center justify-center ${tierInfo.color}`}>
                     <tierInfo.badge className="w-5 h-5" />
                   </div>
                 </div>
@@ -168,7 +168,7 @@ export default function ProfilePage() {
 
                 <Link
                   href="/favorites"
-                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-foreground text-background dark:bg-white dark:text-black rounded-2xl font-bold hover:opacity-90 transition-smooth shadow-pop"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 bg-foreground text-background dark:bg-white dark:text-black rounded-2xl font-bold hover:opacity-90 transition-opacity"
                 >
                   <Heart className="w-4 h-4 fill-current" />
                   View Favorites
@@ -181,7 +181,7 @@ export default function ProfilePage() {
           <div className="flex-1 space-y-8">
             <section>
               <h3 className="label-mono mb-4 ml-2">Appearance</h3>
-              <div className="bg-white dark:bg-card border border-border rounded-3xl overflow-hidden shadow-soft p-5 flex items-center justify-between">
+              <div className="bg-white dark:bg-card border border-border rounded-3xl overflow-hidden p-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-secondary/80 flex items-center justify-center">
                     <Moon className="w-6 h-6 text-muted-foreground" />
@@ -197,7 +197,7 @@ export default function ProfilePage() {
 
             <section>
               <h3 className="label-mono mb-4 ml-2">Preferences</h3>
-              <div className="bg-white dark:bg-card border border-border rounded-[2.5rem] overflow-hidden shadow-soft">
+              <div className="bg-white dark:bg-card border border-border rounded-[2.5rem] overflow-hidden">
                 {[
                   { icon: Bell, label: "Notifications", sub: "Control your alerts" },
                   { icon: CreditCard, label: "Payment Methods", sub: "Manage your cards" },

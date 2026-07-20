@@ -113,7 +113,7 @@ export default function ShopRegistrationPage() {
           <Link href="/profile" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8">
             <ArrowLeft className="w-4 h-4" /> Back to profile
           </Link>
-          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-soft">
+          <div className="rounded-3xl border border-border bg-card p-6 sm:p-8">
             <div className="w-14 h-14 rounded-2xl bg-primary/10 grid place-items-center mb-5">
               <Lock className="w-7 h-7 text-primary" />
             </div>
@@ -332,7 +332,7 @@ export default function ShopRegistrationPage() {
             id="submit-registration"
             type="submit"
             disabled={isSubmitting}
-            className="w-full pill bg-foreground text-background py-4 font-semibold hover:bg-foreground/90 transition-smooth focus-dashed shadow-pop flex items-center justify-center gap-2"
+            className="w-full pill bg-foreground text-background py-4 font-semibold hover:bg-foreground/90 transition-colors focus-dashed flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <>

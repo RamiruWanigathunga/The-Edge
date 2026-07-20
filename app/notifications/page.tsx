@@ -82,7 +82,7 @@ export default function NotificationsPage() {
           </p>
           <Link
             href="/browse"
-            className="inline-flex mt-8 pill bg-foreground text-background px-6 py-2.5 text-sm font-bold focus-dashed hover:bg-foreground/90 transition-smooth shadow-pop"
+            className="inline-flex mt-8 pill bg-foreground text-background px-6 py-2.5 text-sm font-bold focus-dashed hover:bg-foreground/90 transition-colors"
           >
             Start shopping
           </Link>
@@ -110,7 +110,7 @@ export default function NotificationsPage() {
                   <Link
                     key={order.id}
                     href={`/order/${encodeURIComponent(order.referenceNumber)}`}
-                    className="flex items-center justify-between gap-4 rounded-3xl border border-border bg-card p-5 shadow-soft transition-smooth hover:border-muted-foreground/50 focus-dashed"
+                    className="flex items-center justify-between gap-4 rounded-3xl border border-border bg-card p-5 transition-colors hover:border-muted-foreground/50 focus-dashed"
                   >
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="w-12 h-12 rounded-xl bg-secondary grid place-items-center shrink-0">

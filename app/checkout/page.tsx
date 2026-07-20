@@ -110,7 +110,7 @@ export default function CheckoutPage() {
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-3xl border border-border bg-card overflow-hidden shadow-sm"
+                className="rounded-3xl border border-border bg-card overflow-hidden"
               >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
@@ -165,13 +165,13 @@ export default function CheckoutPage() {
       {/* Payment Step Modal */}
       <AnimatePresence>
         {currentShopId && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-background/80 p-4">
             <motion.div 
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="w-full max-w-md bg-card border border-border rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden"
+              className="w-full max-w-md bg-card border border-border rounded-t-[2.5rem] sm:rounded-[2.5rem] overflow-hidden"
             >
               <div className="p-8">
                 <div className="flex justify-between items-start mb-6">
@@ -210,7 +210,7 @@ export default function CheckoutPage() {
                           href={shop?.paymentLink || "#"} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="flex items-center justify-center gap-2 w-full h-14 rounded-2xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20"
+                          className="flex items-center justify-center gap-2 w-full h-14 rounded-2xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors"
                         >
                           Open Payment Link <ExternalLink className="w-4 h-4" />
                         </a>

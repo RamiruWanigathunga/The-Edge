@@ -87,17 +87,17 @@ export function GoogleSignInButton({
         type="button"
         onClick={handleGoogleSignIn}
         disabled={loading}
-        className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-border bg-background px-5 text-base font-bold text-foreground shadow-[0_18px_50px_rgba(0,0,0,0.08)] transition-all hover:-translate-y-0.5 hover:border-foreground/20 hover:bg-secondary/60 hover:shadow-[0_22px_60px_rgba(0,0,0,0.12)] active:translate-y-0 disabled:pointer-events-none disabled:opacity-60 dark:bg-white/8 dark:hover:bg-white/12"
+        className="group relative flex h-14 w-full items-center justify-center gap-3 rounded-full border border-border bg-background px-5 text-base font-bold text-foreground transition-colors hover:border-muted-foreground/50 hover:bg-secondary disabled:pointer-events-none disabled:opacity-60"
       >
         {/* Removed green gradient hover effect */}
-        <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm">
+        <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-white">
           <GoogleIcon />
         </span>
         <span className="relative">
           {loading ? "Opening Google..." : mode === "login" ? "Log in with Google" : "Sign up with Google"}
         </span>
         {!loading && (
-          <ArrowRight className="relative h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+          <ArrowRight className="relative h-4 w-4 text-muted-foreground" />
         )}
       </button>
       {error && (

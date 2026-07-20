@@ -38,7 +38,7 @@ export default function FavoritesPage() {
             <Link
               href="/browse"
               id="go-browse-btn"
-              className="pill bg-primary text-primary-foreground px-8 py-3 font-medium shadow-elevated hover:bg-primary-glow transition-smooth"
+              className="pill bg-primary text-primary-foreground px-8 py-3 font-medium hover:bg-primary-glow transition-colors"
             >
               Go to Browse
             </Link>

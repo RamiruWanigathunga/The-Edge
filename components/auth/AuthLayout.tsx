@@ -71,7 +71,7 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
                   </p>
                   
                   {/* Mode Toggle */}
-                  <div className="flex bg-secondary/50 p-1 rounded-full border border-border/50">
+                  <div className="flex bg-secondary p-1 rounded-full border border-border">
                     <Link 
                       href="/login"
                       onClick={(e) => {
@@ -80,7 +80,7 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
                           setAuthMode("login");
                         }
                       }}
-                      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${authMode === "login" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-colors ${authMode === "login" ? "bg-background text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                     >
                       Log In
                     </Link>
@@ -92,7 +92,7 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
                           setAuthMode("signup");
                         }
                       }}
-                      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${authMode === "signup" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-colors ${authMode === "signup" ? "bg-background text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                     >
                       Sign Up
                     </Link>
@@ -110,9 +110,9 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
                   >
                     <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]">
                       {authMode === "login" ? (
-                        <>Order ahead.<br /><span className="text-muted-foreground/40">Skip the queue.</span></>
+                        <>Order ahead,<br /><span className="text-muted-foreground/40">Skip the queue.</span></>
                       ) : (
-                        <>Taste the<br /><span className="text-muted-foreground/40">Campus.</span></>
+                        <>Place orders<br /><span className="text-muted-foreground/40">In seconds.</span></>
                       )}
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-sm leading-relaxed">
@@ -178,19 +178,19 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
           transition={{
             layout: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }
           }}
-          className="hidden lg:flex flex-1 relative p-6 bg-secondary/50 dark:bg-black/50 overflow-hidden"
+          className="hidden lg:flex flex-1 relative p-6 bg-secondary dark:bg-black overflow-hidden"
         >
-          <div className="relative w-full h-full overflow-hidden rounded-[2.5rem] shadow-2xl group">
+          <div className="relative w-full h-full overflow-hidden rounded-[2.5rem] border border-border group">
             <Image
               src="/images/auth-hero.png"
               alt="The Edge Campus Food"
               fill
               sizes="50vw"
-              className="object-cover transition-transform duration-[20s] ease-linear group-hover:scale-110"
+              className="object-cover"
               priority
             />
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-black/45" />
             
             {/* Floating UI elements */}
             <div className="absolute top-8 left-8">
@@ -199,11 +199,11 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
 
             <div className="absolute bottom-16 left-16 right-16 text-white space-y-4">
               <div className="space-y-4">
-                <h2 className="text-6xl font-bold tracking-tight mb-4 drop-shadow-xl leading-[1.1]">
-                  Your campus, served faster.
+                <h2 className="text-6xl font-bold tracking-tight mb-4 leading-[1.1]">
+                  Skip the queue with online ordering.
                 </h2>
-                <p className="text-xl text-white/80 max-w-md drop-shadow-lg leading-relaxed font-medium">
-                  Order from every shop on campus. Pay once. Pick up when it&apos;s ready - no more queues.
+                <p className="text-xl text-white/80 max-w-md leading-relaxed font-medium">
+                  Order from The Edge. Pick up when it&apos;s ready - no more queues.
                 </p>
               </div>
             </div>

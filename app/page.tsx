@@ -46,7 +46,7 @@ export default function HomePage() {
   return (
     <div className="flex-1 bg-background">
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden pt-6 pb-2 md:pt-28 md:pb-8 dark:bg-gradient-to-b dark:from-black dark:to-background">
+      <section className="relative overflow-hidden pt-6 pb-2 md:pt-28 md:pb-8">
         <div className="container mx-auto px-4">
           <div className="animate-fade-up">
             {/* Profile Greeting */}
@@ -70,14 +70,14 @@ export default function HomePage() {
                 {shops.length > 0 ? shops.filter(s => s.isOpen).slice(0, 5).map((s, idx) => (
                   <div
                     key={s.id || idx}
-                    className="w-8 h-8 rounded-full bg-secondary border-2 border-background grid place-items-center text-sm shadow-sm relative z-10"
+                    className="w-8 h-8 rounded-full bg-secondary border-2 border-background grid place-items-center text-sm relative z-10"
                   >
                     {s.emoji || ["🍡", "🍛", "🥤", "🥟", "🍩"][idx % 5]}
                   </div>
                 )) : ["🍡", "🍛", "🥤", "🥟", "🍩"].map((emoji, idx) => (
                   <div
                     key={idx}
-                    className="w-8 h-8 rounded-full bg-secondary border-2 border-background grid place-items-center text-sm shadow-sm relative z-10"
+                    className="w-8 h-8 rounded-full bg-secondary border-2 border-background grid place-items-center text-sm relative z-10"
                   >
                     {emoji}
                   </div>

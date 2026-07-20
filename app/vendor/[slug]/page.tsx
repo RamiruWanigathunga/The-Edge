@@ -163,7 +163,7 @@ export default function VendorDashboard() {
             <span className="font-bold tracking-tight">The Edge</span>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-secondary grid place-items-center text-2xl shadow-inner">{shop.emoji}</div>
+            <div className="w-12 h-12 rounded-2xl bg-secondary border border-border grid place-items-center text-2xl">{shop.emoji}</div>
             <div className="min-w-0">
               <div className="font-bold truncate text-sm">{shop.name}</div>
               <div className={`text-[10px] flex items-center gap-1.5 font-bold uppercase tracking-wider ${shop.isOpen ? "text-success" : "text-muted-foreground"}`}>
@@ -185,7 +185,7 @@ export default function VendorDashboard() {
               onClick={() => setTab(t.id as Tab)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
                 tab === t.id
-                  ? "bg-foreground text-background shadow-lg shadow-foreground/10 scale-[1.02]"
+                  ? "bg-foreground text-background"
                   : "text-muted-foreground hover:bg-secondary hover:text-foreground"
               }`}
             >
@@ -232,7 +232,7 @@ export default function VendorDashboard() {
                 onClick={() => setTab(t as Tab)}
                 className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap border capitalize transition-all ${
                   tab === t 
-                    ? "bg-foreground text-background border-foreground shadow-sm" 
+                    ? "bg-foreground text-background border-foreground" 
                     : "bg-secondary/50 text-muted-foreground border-transparent"
                 }`}
               >
@@ -243,7 +243,7 @@ export default function VendorDashboard() {
         </header>
 
         {/* Global Toolbar */}
-        <div className="bg-background/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between z-10 sticky top-0 hidden lg:flex">
+        <div className="bg-background border-b border-border px-6 py-4 flex items-center justify-between z-10 sticky top-0 hidden lg:flex">
           <div className="flex items-center gap-6">
             <h1 className="text-xl font-bold capitalize">{tab === "orders" ? "Orders Feed" : tab}</h1>
             {tab === "orders" && (
@@ -271,7 +271,7 @@ export default function VendorDashboard() {
                   key={f}
                   onClick={() => setDateFilter(f as any)}
                   className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${
-                    dateFilter === f ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    dateFilter === f ? "bg-background text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {f}
@@ -365,7 +365,7 @@ export default function VendorDashboard() {
                     initial={{ x: 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     exit={{ x: 20, opacity: 0 }}
-                    className="hidden lg:block w-[400px] bg-background border border-border rounded-[2.5rem] p-6 shadow-2xl sticky top-0 h-fit"
+                    className="hidden lg:block w-[400px] bg-background border border-border rounded-[2.5rem] p-6 sticky top-0 h-fit"
                   >
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="font-bold uppercase tracking-widest text-xs text-muted-foreground">Receipt Preview</h3>
@@ -451,12 +451,12 @@ export default function VendorDashboard() {
       {/* Mobile Receipt Bottom Sheet */}
       <AnimatePresence>
         {selectedOrder && (
-          <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-background/80 backdrop-blur-sm p-4">
+          <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-background/80 p-4">
              <motion.div 
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
-                className="w-full max-w-md bg-background border border-border rounded-t-[2.5rem] shadow-2xl p-6 overflow-y-auto max-h-[90vh]"
+                className="w-full max-w-md bg-background border border-border rounded-t-[2.5rem] p-6 overflow-y-auto max-h-[90vh]"
              >
                 <div className="flex justify-center mb-4">
                   <div className="w-12 h-1 bg-secondary rounded-full" />
@@ -503,8 +503,8 @@ function OrderCard({
       onClick={onClick}
       className={`group relative rounded-3xl border p-5 cursor-pointer transition-all ${
         isActive 
-          ? "bg-foreground text-background border-foreground shadow-2xl scale-[1.02] z-10" 
-          : "bg-card border-border hover:border-primary/50 hover:shadow-lg shadow-sm"
+          ? "bg-foreground text-background border-foreground z-10" 
+          : "bg-card border-border hover:border-primary/50"
       }`}
     >
       <div className="flex items-center justify-between mb-3">
@@ -582,7 +582,7 @@ function ReceiptPreview({ order }: { order: VendorOrder }) {
   const formattedRef = order.referenceNumber.replace(/^RF (\d{4}) (\d{6}) (\d{4})$/, "#RF $1 $2 $3");
 
   return (
-    <div className="receipt-print-container bg-white text-black p-8 rounded-lg shadow-inner font-sans border-2 border-dashed border-gray-200">
+    <div className="receipt-print-container bg-white text-black p-8 rounded-lg font-sans border-2 border-dashed border-gray-200">
       <div className="text-center mb-6">
         <h4 className="font-black text-xl tracking-tighter uppercase mb-1">Order Ticket</h4>
         <div className="text-[10px] text-gray-500 uppercase tracking-widest">{order.createdAt}</div>

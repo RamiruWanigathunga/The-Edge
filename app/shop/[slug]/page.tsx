@@ -97,7 +97,7 @@ export default function ShopPage() {
 
         {/* Sticky category tabs */}
         {cats.length > 1 && (
-          <div className="sticky top-16 bg-background/90 backdrop-blur-xl z-20 -mx-4 px-4 py-4 mt-8 border-b border-border">
+          <div className="sticky top-16 bg-background z-20 -mx-4 px-4 py-4 mt-8 border-b border-border">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {cats.map((c) => (
                 <button

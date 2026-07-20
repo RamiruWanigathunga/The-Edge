@@ -31,7 +31,7 @@ export function OfflineBanner() {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 50, opacity: 0 }}
-          className="fixed bottom-24 left-4 right-4 z-50 flex items-center gap-3 bg-destructive text-destructive-foreground px-4 py-3 rounded-2xl shadow-xl border border-destructive/20 md:max-w-sm md:left-auto md:right-4 md:bottom-4"
+          className="fixed bottom-24 left-4 right-4 z-50 flex items-center gap-3 bg-destructive text-destructive-foreground px-4 py-3 rounded-2xl border border-destructive/20 md:max-w-sm md:left-auto md:right-4 md:bottom-4"
         >
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
             <WifiOff className="w-4 h-4" />

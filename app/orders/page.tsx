@@ -105,7 +105,7 @@ export default function OrdersPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3, delay: Math.min(idx * 0.05, 0.3) }}
-                  className="group rounded-3xl border border-border bg-card shadow-soft overflow-hidden"
+                  className="group rounded-3xl border border-border bg-card overflow-hidden"
                 >
                   {/* Shop banner strip */}
                   <div className="relative h-16 w-full overflow-hidden">
@@ -119,7 +119,7 @@ export default function OrdersPage() {
                     ) : (
                       <div className="w-full h-full hero-gradient" />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 bg-black/45" />
                     <div className="absolute inset-0 flex items-center justify-between px-5">
                       <div className="flex items-center gap-2.5">
                         <span className="text-xl">{order.shopEmoji}</span>
@@ -128,8 +128,8 @@ export default function OrdersPage() {
                       <div
                         className={`pill text-[10px] font-bold px-2.5 py-1 flex items-center gap-1.5 ${
                           order.status === "completed"
-                            ? "bg-white/20 text-white backdrop-blur-sm"
-                            : "bg-white/20 text-white backdrop-blur-sm"
+                            ? "bg-white/20 text-white"
+                            : "bg-white/20 text-white"
                         }`}
                       >
                         {order.status === "completed" ? (
@@ -203,7 +203,7 @@ export default function OrdersPage() {
               </div>
             )}
 
-            <section className="mt-6 rounded-3xl border border-border bg-card p-5 shadow-soft">
+            <section className="mt-6 rounded-3xl border border-border bg-card p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h2 className="font-bold tracking-tight">Total spend</h2>
@@ -232,7 +232,7 @@ export default function OrdersPage() {
             </p>
             <Link
               href="/browse"
-              className="inline-flex mt-8 pill bg-foreground text-background px-6 py-2.5 text-sm font-bold focus-dashed hover:bg-foreground/90 transition-smooth shadow-pop"
+              className="inline-flex mt-8 pill bg-foreground text-background px-6 py-2.5 text-sm font-bold focus-dashed hover:bg-foreground/90 transition-colors"
             >
               Start shopping
             </Link>

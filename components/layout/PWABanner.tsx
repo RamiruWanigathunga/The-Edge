@@ -87,7 +87,7 @@ export const PWABanner = () => {
     <div 
       className={`fixed bottom-20 left-4 right-4 sm:left-auto sm:right-4 sm:w-[340px] md:hidden z-[60] animate-slide-in-right transition-all duration-300 ${closing ? "opacity-0 translate-x-8" : "opacity-100"}`}
     >
-      <div className="bg-card border border-border rounded-3xl p-4 shadow-elevated flex items-start gap-3">
+      <div className="bg-card border border-border rounded-3xl p-4 flex items-start gap-3">
         <button
           type="button"
           onClick={handleInstall}

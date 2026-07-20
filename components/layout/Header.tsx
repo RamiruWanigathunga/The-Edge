@@ -38,7 +38,7 @@ export const Header = () => {
     <header 
       className={`hidden md:block fixed w-full top-0 z-40 transition-all duration-300 ${
         !isHome || scrolled 
-          ? "bg-background/80 backdrop-blur-xl border-b border-border/60" 
+          ? "bg-background border-b border-border" 
           : "bg-transparent border-transparent"
       }`}
     >

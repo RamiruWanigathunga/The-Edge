@@ -35,7 +35,7 @@ export default function CartPage() {
           </p>
           <Link
             href="/browse"
-            className="inline-flex mt-8 pill bg-foreground text-background px-6 py-2.5 text-sm font-bold focus-dashed hover:bg-foreground/90 transition-smooth shadow-pop"
+            className="inline-flex mt-8 pill bg-foreground text-background px-6 py-2.5 text-sm font-bold focus-dashed hover:bg-foreground/90 transition-colors"
           >
             Start shopping
           </Link>
@@ -71,12 +71,12 @@ export default function CartPage() {
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="rounded-[2.5rem] border border-border bg-card overflow-hidden shadow-sm"
+                  className="rounded-[2.5rem] border border-border bg-card overflow-hidden"
                 >
                   {/* Shop header */}
                   <div className="px-6 py-5 bg-secondary/30 border-b border-border flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-background grid place-items-center text-2xl shadow-inner">
+                      <div className="w-12 h-12 rounded-2xl bg-background grid place-items-center text-2xl border border-border">
                         {shop.emoji}
                       </div>
                       <div>
@@ -103,7 +103,7 @@ export default function CartPage() {
                           onClick={() => list.forEach(item => setScheduledSlot(item.item.id, s))}
                           className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
                             commonSlot === s 
-                              ? "bg-primary text-primary-foreground border-primary shadow-sm" 
+                              ? "bg-primary text-primary-foreground border-primary" 
                               : "bg-background text-muted-foreground border-border hover:border-primary/50"
                           }`}
                         >
@@ -123,7 +123,7 @@ export default function CartPage() {
                             alt={c.item.title}
                             fill
                             sizes="96px"
-                            className="rounded-2xl object-cover shadow-sm group-hover:scale-105 transition-transform"
+                            className="rounded-2xl object-cover"
                           />
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col">
@@ -158,7 +158,7 @@ export default function CartPage() {
                                   onClick={() => setDining(c.item.id, type)}
                                   className={`px-4 py-1.5 rounded-full transition-all ${
                                     c.dining === type 
-                                      ? "bg-background text-foreground shadow-sm" 
+                                      ? "bg-background text-foreground" 
                                       : "text-muted-foreground hover:text-foreground"
                                   }`}
                                 >
@@ -167,7 +167,7 @@ export default function CartPage() {
                               ))}
                             </div>
 
-                            <div className="inline-flex items-center rounded-full bg-background border border-border overflow-hidden shadow-sm">
+                            <div className="inline-flex items-center rounded-full bg-background border border-border overflow-hidden">
                               <button
                                 onClick={() => setQty(c.item.id, c.qty - 1)}
                                 className="w-10 h-10 grid place-items-center hover:bg-secondary transition-colors"
@@ -197,7 +197,7 @@ export default function CartPage() {
 
         {/* Right: order summary */}
         <aside className="h-fit">
-          <div className="sticky top-24 rounded-[2.5rem] border border-border bg-card p-8 shadow-xl">
+          <div className="sticky top-24 rounded-[2.5rem] border border-border bg-card p-8">
             <div className="label-mono mb-4 text-primary">● Final Summary</div>
             <h2 className="text-2xl font-bold tracking-tight mb-6">
               Total Order
@@ -236,7 +236,7 @@ export default function CartPage() {
 
             <button
               onClick={() => router.push("/checkout")}
-              className="w-full inline-flex items-center justify-center gap-3 h-16 rounded-2xl bg-foreground text-background font-bold hover:bg-foreground/90 transition-all shadow-pop active:scale-[0.98]"
+              className="w-full inline-flex items-center justify-center gap-3 h-16 rounded-2xl bg-foreground text-background font-bold hover:bg-foreground/90 transition-colors"
             >
               Check out now <ArrowRight className="w-5 h-5" />
             </button>

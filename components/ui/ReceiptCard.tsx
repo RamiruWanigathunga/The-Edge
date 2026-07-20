@@ -12,7 +12,7 @@ export function ReceiptCard({ order }: { order: PerShopOrder }) {
   });
 
   return (
-    <div className="relative rounded-2xl overflow-hidden bg-card border border-border shadow-soft text-base">
+    <div className="relative rounded-2xl overflow-hidden bg-card border border-border text-base">
       {/* Shop banner header */}
       <div className="relative h-28 sm:h-32 w-full overflow-hidden">
         {order.shopBanner ? (
@@ -25,7 +25,7 @@ export function ReceiptCard({ order }: { order: PerShopOrder }) {
         ) : (
           <div className="w-full h-full hero-gradient" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-black/45" />
         <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
           <div className="flex items-center gap-2.5">
             <span className="text-3xl">{order.shopEmoji}</span>

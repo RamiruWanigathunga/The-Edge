@@ -74,16 +74,16 @@ export default function VendorLoginPage() {
           transition={{ duration: 1, delay: 0.2 }}
           className="hidden lg:flex flex-1 relative p-6 bg-secondary/30 dark:bg-black/50 overflow-hidden"
         >
-          <div className="relative w-full h-full overflow-hidden rounded-[2.5rem] shadow-2xl group">
+          <div className="relative w-full h-full overflow-hidden rounded-[2.5rem] border border-border group">
             <Image
               src="/images/vendor-hero.png"
               alt="Professional Kitchen"
               fill
-              className="object-cover transition-transform duration-[30s] ease-linear group-hover:scale-105"
+              className="object-cover"
               priority
             />
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-transparent to-black/40" />
+            <div className="absolute inset-0 bg-black/45" />
             
             {/* Removed Floating Achievement/Status Card per user request */}
 
@@ -93,10 +93,10 @@ export default function VendorLoginPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <h2 className="text-6xl font-bold tracking-tight mb-4 drop-shadow-2xl leading-[1.1]">
+                <h2 className="text-6xl font-bold tracking-tight mb-4 leading-[1.1]">
                   Efficiency in every order.
                 </h2>
-                <p className="text-xl text-white/80 max-w-md drop-shadow-xl leading-relaxed font-medium">
+                <p className="text-xl text-white/80 max-w-md leading-relaxed font-medium">
                   We empower local vendors with the tools to handle peak campus rush hours with zero friction.
                 </p>
               </motion.div>

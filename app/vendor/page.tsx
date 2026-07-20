@@ -31,7 +31,7 @@ export default function VendorHomePage() {
   if (!user) {
     return (
       <div className="flex-1 bg-background grid place-items-center px-4">
-        <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-soft">
+        <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 sm:p-8">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 grid place-items-center mb-5">
             <Lock className="w-7 h-7 text-primary" />
           </div>
@@ -50,7 +50,7 @@ export default function VendorHomePage() {
   if (shops.length === 0) {
     return (
       <div className="flex-1 bg-background grid place-items-center px-4">
-        <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-soft text-center">
+        <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 sm:p-8 text-center">
           <div className="w-16 h-16 rounded-2xl bg-secondary grid place-items-center mx-auto mb-5">
             <Store className="w-8 h-8 text-muted-foreground" />
           </div>

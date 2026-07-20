@@ -58,7 +58,7 @@ export const ShopCard = ({ shop }: ShopCardProps) => {
   const visibleTags = shop.tags.filter((tag) => !hiddenShopTags.has(tag.toLowerCase()));
 
   return (
-    <article className="group flex-shrink-0 w-full h-[220px] snap-start transition-smooth hover:shadow-elevated rounded-3xl">
+    <article className="group flex-shrink-0 w-full h-[220px] snap-start transition-smooth rounded-3xl">
       <Link
         href={`/shop/${shop.slug}`}
         id={`shop-card-${shop.id}`}
@@ -70,7 +70,7 @@ export const ShopCard = ({ shop }: ShopCardProps) => {
             <img 
               src={shop.banner} 
               alt={shop.name} 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform" 
+              className="w-full h-full object-cover" 
             />
           ) : (
             <div className="w-full h-full grid place-items-center text-3xl">{shop.emoji}</div>
@@ -78,7 +78,7 @@ export const ShopCard = ({ shop }: ShopCardProps) => {
           
           {/* Overlay Open/Closed Pill */}
           <span
-            className={`absolute top-3 right-3 pill text-[10px] font-semibold px-2 py-0.5 z-10 backdrop-blur-md shadow-sm ${
+            className={`absolute top-3 right-3 pill text-[10px] font-semibold px-2 py-0.5 z-10 ${
               shop.isOpen
                 ? "bg-success/90 text-success-foreground"
                 : "bg-destructive/90 text-destructive-foreground"

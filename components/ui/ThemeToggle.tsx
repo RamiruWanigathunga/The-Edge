@@ -23,12 +23,12 @@ export const ThemeToggle = () => {
       id="theme-toggle"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={`relative flex items-center w-11 h-6 p-0.5 rounded-full transition-all duration-300 focus-dashed ${
-        isDark ? "bg-primary shadow-inner" : "bg-muted"
+        isDark ? "bg-primary" : "bg-muted"
       }`}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       <motion.div
-        className="w-5 h-5 rounded-full bg-white shadow-md"
+        className="w-5 h-5 rounded-full bg-white"
         animate={{
           x: isDark ? 20 : 0,
         }}

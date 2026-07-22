@@ -257,6 +257,19 @@
   }
 }
 
+/* Toasts swipe in/out horizontally (right -> left) instead of the default vertical slide */
+[data-sonner-toast] {
+  --y: translateX(100%);
+}
+
+[data-sonner-toast][data-mounted="true"] {
+  --y: translateX(0);
+}
+
+[data-sonner-toast][data-removed="true"][data-front="true"][data-swipe-out="false"] {
+  --y: translateX(-100%);
+}
+
 /* ── THERMAL RECEIPT PRINT STYLES ── */
 @media print {
   /* Hide everything by default */

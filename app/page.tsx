@@ -56,10 +56,10 @@ export default function HomePage() {
           <div className="animate-fade-up">
             {/* Profile Greeting */}
             <div className="flex items-center justify-between mb-8 md:hidden">
-              <div>
+              <Link href="/profile">
                 <div className="text-[13px] text-muted-foreground font-medium">{greeting}</div>
                 <div className="text-lg font-semibold leading-tight text-foreground">{displayName.split(' ')[0]}</div>
-              </div>
+              </Link>
               <NotificationLink className="w-7 h-7 hover:opacity-80" iconClassName="w-6 h-6" />
             </div>
 

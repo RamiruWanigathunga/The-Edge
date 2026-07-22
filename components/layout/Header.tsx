@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/store/cart";
 import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
 import { NotificationLink } from "@/components/layout/NotificationLink";
+import { QuickThemeToggle } from "@/components/ui/QuickThemeToggle";
 
 export const Header = () => {
   const count = useCart((s) => s.count());
@@ -63,6 +64,7 @@ export const Header = () => {
         {/* Right actions */}
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-3">
+            <QuickThemeToggle />
             <button
               type="button"
               onClick={toggleDrawer}

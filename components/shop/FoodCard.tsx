@@ -153,7 +153,7 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
                 }}
                 disabled={!item.isAvailable}
                 className={`w-8 h-8 rounded-full text-white grid place-items-center transition-colors focus-dashed disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md ${
-                  isInCart ? "bg-[#3AD07A] dark:bg-[#2DAA63]" : "bg-foreground hover:bg-foreground/90"
+                  isInCart ? "bg-[#3AD07A] dark:bg-[#2DAA63]" : "bg-foreground hover:bg-foreground/90 dark:bg-zinc-900 dark:hover:bg-zinc-800"
                 }`}
               >
                 {isInCart ? (

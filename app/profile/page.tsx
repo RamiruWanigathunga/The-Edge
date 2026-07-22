@@ -3,17 +3,19 @@
 import * as React from "react";
 import Link from "next/link";
 import {
-  Bell, LogOut, ChevronRight, Moon, Pencil, CreditCard, Heart,
+  Bell, LogOut, ChevronRight, Moon, Sun, Pencil, CreditCard, Heart,
   HelpCircle, Check,
   Store, ArrowRight
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { QuickThemeToggle } from "@/components/ui/QuickThemeToggle";
 import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
 import { useSupabaseUser, useProfile, useUserOrders, useMyApprovedShops } from "@/lib/supabase/hooks";
 import { updateProfile } from "@/lib/supabase/data";
 import { useSignOut } from "@/lib/supabase/useSignOut";
 import { DeleteAccountButton } from "@/components/auth/DeleteAccountButton";
 import { toast } from "sonner";
+
 import { Footer } from "@/components/layout/Footer";
 
 export default function ProfilePage() {
@@ -175,6 +177,18 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <ThemeToggle />
+              </div>
+              <div className="md:hidden mt-3 bg-white dark:bg-card border border-border rounded-3xl overflow-hidden p-5 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-secondary/80 flex items-center justify-center">
+                    <Sun className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-[16px]">Quick Toggle</div>
+                    <div className="text-[12px] text-muted-foreground font-medium">Switch light/dark instantly</div>
+                  </div>
+                </div>
+                <QuickThemeToggle />
               </div>
             </section>
 

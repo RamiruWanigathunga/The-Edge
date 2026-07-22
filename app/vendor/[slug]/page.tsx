@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ListOrdered, Utensils, BarChart3, Settings,
   Check, ChefHat, Bell, TrendingUp, DollarSign,
@@ -39,6 +39,7 @@ type Tab = "orders" | "menu" | "analytics" | "settings";
 
 export default function VendorDashboard() {
   const params = useParams();
+  const router = useRouter();
   const slug = params?.slug as string;
   const { data: user, isLoading: userLoading } = useSupabaseUser();
   const { data: shop, isLoading: shopLoading } = useVendorShop(slug, user?.id);
@@ -385,11 +386,18 @@ export default function VendorDashboard() {
           {[
             { id: "orders", label: "Live Orders", icon: ListOrdered },
             { id: "menu", label: "Menu Items", icon: Utensils },
+            { id: "analytics", label: "Analytics", icon: BarChart3 },
             { id: "settings", label: "Store Settings", icon: Settings },
           ].map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id as Tab)}
+              onClick={() => {
+                if (t.id === "analytics") {
+                  router.push(`/vendor/${slug}/analytics`);
+                } else {
+                  setTab(t.id as Tab);
+                }
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
                 tab === t.id
                   ? "bg-foreground text-background"
@@ -432,10 +440,16 @@ export default function VendorDashboard() {
             </div>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {["orders", "menu", "settings"].map((t) => (
+            {["orders", "menu", "analytics", "settings"].map((t) => (
               <button
                 key={t}
-                onClick={() => setTab(t as Tab)}
+                onClick={() => {
+                  if (t === "analytics") {
+                    router.push(`/vendor/${slug}/analytics`);
+                  } else {
+                    setTab(t as Tab);
+                  }
+                }}
                 className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap border capitalize transition-all ${
                   tab === t 
                     ? "bg-foreground text-background border-foreground" 

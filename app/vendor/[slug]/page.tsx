@@ -673,7 +673,6 @@ export default function VendorDashboard() {
                           </span>
                         )}
                       </div>
-                      {item.description && <div className="text-xs text-muted-foreground mt-1 line-clamp-1">{item.description}</div>}
                     </div>
 
                     <div className="flex items-center gap-3 flex-wrap">

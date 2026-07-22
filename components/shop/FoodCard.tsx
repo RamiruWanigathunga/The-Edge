@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { MenuItem } from "@/lib/types";
 import { useCart } from "@/store/cart";
 import { useServerFavorites, useShopById, useSupabaseUser, useToggleFavorite } from "@/lib/supabase/hooks";
+import { AddToCartModal } from "@/components/shop/AddToCartModal";
 
 interface FoodCardProps {
   item: MenuItem;
@@ -22,6 +23,7 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
   const toggleFavorite = useToggleFavorite();
   const serverFav = favorites.includes(item.id);
   const [optimisticFav, setOptimisticFav] = useState<boolean | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   const fav = optimisticFav ?? serverFav;
   const { data: shop } = useShopById(item.shopId);
   const isInCart = items.some((cartItem) => cartItem.item.id === item.id);
@@ -126,8 +128,7 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
                     toast.error(`${item.title} removed from cart`);
                     return;
                   }
-                  add(item, 1);
-                  toast.success(`${item.title} added to cart`);
+                  setShowAddModal(true);
                 }}
                 disabled={!item.isAvailable}
                 className={`w-8 h-8 rounded-full text-white grid place-items-center transition-colors focus-dashed disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md ${
@@ -144,6 +145,18 @@ export const FoodCard = ({ item, compact = false, shopName }: FoodCardProps) => 
           </div>
         </div>
       </div>
+
+      <AddToCartModal
+        item={item}
+        shopName={shopName ?? shop?.name}
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onConfirm={(qty, opts) => {
+          add(item, qty, opts);
+          setShowAddModal(false);
+          toast.success(`${qty} ${item.title} added to cart`);
+        }}
+      />
     </article>
   );
 };

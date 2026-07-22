@@ -28,9 +28,10 @@ import {
   useUpdateShopDetails
 } from "@/lib/supabase/hooks";
 import { useSignOut } from "@/lib/supabase/useSignOut";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { DeleteAccountButton } from "@/components/auth/DeleteAccountButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
 import type { OrderStatus } from "@/lib/types";
 import type { VendorOrder } from "@/lib/supabase/data";
@@ -731,209 +732,189 @@ export default function VendorDashboard() {
             </div>
           )}
 
-          {/* ── SETTINGS TAB ── */}
           {tab === "settings" && (
             <div className="max-w-2xl space-y-6">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight">Store Management & Controls</h2>
-                <p className="text-sm text-muted-foreground mt-1">Configure shop profile, branding, order limits, and operational hours.</p>
+                <h2 className="text-2xl font-bold tracking-tight">Store settings</h2>
+                <p className="text-sm text-muted-foreground mt-1">Most fields save automatically when you leave the field.</p>
               </div>
 
-              {/* Store Status Control */}
-              <div className="rounded-3xl border border-border bg-card p-6 space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Store Live Status</h3>
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/30 border border-border">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 font-bold text-sm">
-                      <span className={`w-2.5 h-2.5 rounded-full ${shopForm.isOpen ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"}`} />
-                      {shopForm.isOpen ? "Store is currently LIVE & Accepting Orders" : "Store is PAUSED / CLOSED"}
-                    </div>
-                    <p className="text-xs text-muted-foreground">Toggle off to temporarily pause all incoming customer orders.</p>
-                  </div>
-                  <button
+              {/* Store Status */}
+              <div className="rounded-3xl border border-border bg-card p-5 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm">Store status</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {shopForm.isOpen ? "Live and accepting orders" : "Paused — customers can't order"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleToggleStoreStatus}
+                  disabled={updateShopDetailsMutation.isPending}
+                  className={`w-12 h-7 rounded-full relative transition-colors disabled:opacity-50 ${shopForm.isOpen ? "bg-success" : "bg-muted"}`}
+                >
+                  <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all ${shopForm.isOpen ? "left-6" : "left-1"}`} />
+                </button>
+              </div>
+
+              {/* Closed Note */}
+              <div className="rounded-3xl border border-border bg-card p-5 space-y-3">
+                <h3 className="font-bold text-sm">Closed notice</h3>
+                <p className="text-xs text-muted-foreground">Shown to customers while your store is paused or outside hours.</p>
+                <div className="flex gap-2">
+                  <Input
+                    value={shopForm.closedNote}
+                    onChange={(e) => setShopForm({ ...shopForm, closedNote: e.target.value })}
+                    placeholder="e.g. Back tomorrow at 8 AM"
+                    className="rounded-2xl"
+                  />
+                  <Button
                     type="button"
-                    onClick={handleToggleStoreStatus}
-                    className={`pill px-4 py-2 text-xs font-bold transition-all ${
-                      shopForm.isOpen
-                        ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                        : "bg-muted text-muted-foreground hover:bg-secondary"
-                    }`}
+                    onClick={handleSaveClosedNote}
+                    disabled={updateShopDetailsMutation.isPending}
+                    className="pill shrink-0"
                   >
-                    {shopForm.isOpen ? "Pause Store" : "Open Store"}
-                  </button>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Closed Note / Notice to Customers</label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={shopForm.closedNote}
-                      onChange={(e) => setShopForm({ ...shopForm, closedNote: e.target.value })}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveClosedNote();
-                      }}
-                      placeholder="e.g. Back in 30 minutes! High order volume."
-                      className="rounded-2xl flex-1"
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleSaveClosedNote}
-                      disabled={updateShopDetailsMutation.isPending}
-                      className="pill bg-foreground text-background font-bold text-xs px-5 shrink-0"
-                    >
-                      Save Note
-                    </Button>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground">Shown to customers on your store page when paused or closed.</p>
+                    Save
+                  </Button>
                 </div>
               </div>
 
-              {/* Branding & Profile Details */}
-              <div className="rounded-3xl border border-border bg-card p-6 space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Shop Branding & Profile</h3>
-                
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div className="space-y-1 sm:col-span-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Shop Name</label>
+              {/* Operating Hours */}
+              <div className="rounded-3xl border border-border bg-card p-5 space-y-3">
+                <h3 className="font-bold text-sm">Operating hours</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Opens</label>
+                    <Input type="time" value={openingTime} onChange={(e) => setOpeningTime(e.target.value)} className="rounded-2xl" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Closes</label>
+                    <Input type="time" value={closingTime} onChange={(e) => setClosingTime(e.target.value)} className="rounded-2xl" />
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    if (!shop?.id) return;
+                    try {
+                      await updateHoursMutation.mutateAsync({ shopId: shop.id, openingTime, closingTime });
+                      toast.success("Operating hours updated");
+                    } catch {
+                      toast.error("Failed to update hours");
+                    }
+                  }}
+                  disabled={updateHoursMutation.isPending}
+                  className="pill w-full"
+                >
+                  Save Hours
+                </Button>
+              </div>
+
+              {/* Shop Identity */}
+              <div className="rounded-3xl border border-border bg-card p-5 space-y-4">
+                <h3 className="font-bold text-sm">Shop details</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Name</label>
                     <Input
-                      required
                       value={shopForm.name}
                       onChange={(e) => setShopForm({ ...shopForm, name: e.target.value })}
-                      onBlur={() => handleAutoSaveShopDetails({ name: shopForm.name }, "Shop name")}
+                      onBlur={() => handleAutoSaveShopDetails({ name: shopForm.name }, "Name")}
                       className="rounded-2xl"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Emoji Icon</label>
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Emoji</label>
                     <Input
                       value={shopForm.emoji}
                       onChange={(e) => setShopForm({ ...shopForm, emoji: e.target.value })}
-                      onBlur={() => handleAutoSaveShopDetails({ emoji: shopForm.emoji }, "Emoji icon")}
-                      placeholder="🍽️"
-                      className="rounded-2xl text-center text-lg"
+                      onBlur={() => handleAutoSaveShopDetails({ emoji: shopForm.emoji }, "Emoji")}
+                      className="rounded-2xl"
                     />
                   </div>
                 </div>
-
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tagline</label>
                   <Input
                     value={shopForm.tagline}
                     onChange={(e) => setShopForm({ ...shopForm, tagline: e.target.value })}
                     onBlur={() => handleAutoSaveShopDetails({ tagline: shopForm.tagline }, "Tagline")}
-                    placeholder="e.g. Fresh artisan pizza & pasta"
                     className="rounded-2xl"
                   />
                 </div>
-
                 <div className="space-y-1">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</label>
                   <Input
                     value={shopForm.description}
                     onChange={(e) => setShopForm({ ...shopForm, description: e.target.value })}
                     onBlur={() => handleAutoSaveShopDetails({ description: shopForm.description }, "Description")}
-                    placeholder="Tell customers about your kitchen..."
                     className="rounded-2xl"
                   />
                 </div>
-
-                {/* Banner & Logo URLs */}
-                <div className="grid sm:grid-cols-2 gap-4 pt-2">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Banner Image URL</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Banner URL</label>
                     <Input
                       value={shopForm.bannerUrl}
                       onChange={(e) => setShopForm({ ...shopForm, bannerUrl: e.target.value })}
-                      onBlur={() => handleAutoSaveShopDetails({ banner_url: shopForm.bannerUrl || null }, "Banner image")}
-                      placeholder="https://..."
+                      onBlur={() => handleAutoSaveShopDetails({ banner_url: shopForm.bannerUrl || null }, "Banner")}
                       className="rounded-2xl"
                     />
-                    {shopForm.bannerUrl && (
-                      <div className="relative h-20 w-full rounded-2xl overflow-hidden border border-border bg-secondary">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={shopForm.bannerUrl} alt="Banner Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
                   </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Logo Image URL</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Logo URL</label>
                     <Input
                       value={shopForm.logoUrl}
                       onChange={(e) => setShopForm({ ...shopForm, logoUrl: e.target.value })}
-                      onBlur={() => handleAutoSaveShopDetails({ logo_url: shopForm.logoUrl || null }, "Logo image")}
-                      placeholder="https://..."
+                      onBlur={() => handleAutoSaveShopDetails({ logo_url: shopForm.logoUrl || null }, "Logo")}
                       className="rounded-2xl"
                     />
-                    {shopForm.logoUrl && (
-                      <div className="relative h-20 w-20 rounded-2xl overflow-hidden border border-border bg-secondary">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={shopForm.logoUrl} alt="Logo Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
                   </div>
                 </div>
-
-                <div className="space-y-1 pt-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Payment Gateway / Payment Link</label>
-                  <Input
-                    value={shopForm.paymentLink}
-                    onChange={(e) => setShopForm({ ...shopForm, paymentLink: e.target.value })}
-                    onBlur={() => handleAutoSaveShopDetails({ payment_link: shopForm.paymentLink || null }, "Payment link")}
-                    placeholder="https://pay.example.com/..."
-                    className="rounded-2xl"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Prep Time (mins)</label>
+                    <Input
+                      type="number"
+                      value={shopForm.prepTimeMinutes}
+                      onChange={(e) => setShopForm({ ...shopForm, prepTimeMinutes: parseInt(e.target.value, 10) || 0 })}
+                      onBlur={() => handleAutoSaveShopDetails({ prep_time_minutes: shopForm.prepTimeMinutes }, "Prep time")}
+                      className="rounded-2xl"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Payment Link</label>
+                    <Input
+                      value={shopForm.paymentLink}
+                      onChange={(e) => setShopForm({ ...shopForm, paymentLink: e.target.value })}
+                      onBlur={() => handleAutoSaveShopDetails({ payment_link: shopForm.paymentLink || null }, "Payment link")}
+                      className="rounded-2xl"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Kitchen Operations & Hours */}
-              <div className="rounded-3xl border border-border bg-card p-6 space-y-4">
-                <h3 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Kitchen Prep Time & Operating Hours</h3>
-                
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Average Order Prep Time (Minutes)</label>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={120}
-                    value={shopForm.prepTimeMinutes}
-                    onChange={(e) => setShopForm({ ...shopForm, prepTimeMinutes: parseInt(e.target.value, 10) || 10 })}
-                    onBlur={() => handleAutoSaveShopDetails({ prep_time_minutes: shopForm.prepTimeMinutes }, "Average prep time")}
-                    className="rounded-2xl max-w-xs"
-                  />
-                  <p className="text-[11px] text-muted-foreground">Used to calculate estimated pickup times for customers.</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Opening Time</label>
-                    <Input
-                      type="time"
-                      value={openingTime}
-                      onChange={(e) => {
-                        setOpeningTime(e.target.value);
-                        handleAutoSaveShopDetails({ opening_time: e.target.value }, "Opening time");
-                      }}
-                      className="rounded-2xl"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Closing Time</label>
-                    <Input
-                      type="time"
-                      value={closingTime}
-                      onChange={(e) => {
-                        setClosingTime(e.target.value);
-                        handleAutoSaveShopDetails({ closing_time: e.target.value }, "Closing time");
-                      }}
-                      className="rounded-2xl"
-                    />
-                  </div>
-                </div>
+              {/* Danger Zone */}
+              <div className="rounded-3xl border border-destructive/20 bg-destructive/5 p-5">
+                <h3 className="font-bold text-sm mb-1">Danger zone</h3>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Deleting your account removes your vendor login. Your shop listing stays live but becomes
+                  unowned until an admin reassigns it.
+                </p>
+                <DeleteAccountButton
+                  redirectTo="/vendor/login"
+                  warning="This permanently deletes your vendor account and login. Your shop, its menu, and past orders remain but will no longer be manageable by you."
+                />
               </div>
             </div>
           )}
 
+          {/* Any remaining unhandled tab falls back to a placeholder */}
+          {tab !== "orders" && tab !== "menu" && tab !== "settings" && (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground italic">
+               <p>Section &ldquo;{tab}&rdquo; under reconstruction for multi-shop flow.</p>
+            </div>
+          )}
         </div>
       </main>
 

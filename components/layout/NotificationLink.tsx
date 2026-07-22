@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSupabaseUser, useUserOrders } from "@/lib/supabase/hooks";
 import type { OrderStatus } from "@/lib/types";
 
@@ -18,10 +18,31 @@ export function NotificationLink({
 }: NotificationLinkProps) {
   const { data: user } = useSupabaseUser();
   const { data: orders = [] } = useUserOrders(user?.id);
+  const [clearedIds, setClearedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user?.id) {
+      setClearedIds(new Set());
+      return;
+    }
+
+    const readCleared = () => {
+      const saved = localStorage.getItem(`edge-cleared-notifications-${user.id}`);
+      setClearedIds(new Set(saved ? JSON.parse(saved) : []));
+    };
+
+    readCleared();
+    window.addEventListener("edge-cleared-notifications-updated", readCleared);
+    window.addEventListener("storage", readCleared);
+    return () => {
+      window.removeEventListener("edge-cleared-notifications-updated", readCleared);
+      window.removeEventListener("storage", readCleared);
+    };
+  }, [user?.id]);
 
   const hasNotifications = useMemo(
-    () => orders.some((order) => notifyingStatuses.has(order.status)),
-    [orders]
+    () => orders.some((order) => notifyingStatuses.has(order.status) && !clearedIds.has(order.id)),
+    [orders, clearedIds]
   );
 
   const lightIcon = hasNotifications

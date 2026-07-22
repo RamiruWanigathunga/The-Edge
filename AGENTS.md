@@ -46,4 +46,4 @@ Do not expose Supabase service-role keys in client code. Keep browser-safe clien
 - **README Updated**: A full visual guide and codebase walkthrough is now available in `README.md`.
 - **Auth URLs**: Separate routes for `/login` and `/signup` have been implemented.
 - **Vendor Access**: Vendor login is at `/vendor/login` and requires manual whitelisting in Supabase by an admin.
-- **Shop Registration**: New shops apply at `/shop-registration`. Admins approve them via SQL editor (`select private.approve_shop_registration('ID')`). See `README.md` for details.
+- **Shop Registration**: New shops apply at `/shop-registration`, inserted directly into `public.shops` with `status='pending'` (no separate staging table). Admins approve via SQL editor (`select private.approve_shop('ID')`). See `README.md` for details.

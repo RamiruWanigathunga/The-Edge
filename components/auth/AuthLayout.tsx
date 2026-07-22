@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { getLastAccount, type LastAccount } from "@/lib/lastAccount";
 
 interface AuthLayoutProps {
   initialMode?: "login" | "signup";
@@ -18,7 +19,12 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const error = searchParams.get("error");
-  
+  const [lastAccount, setLastAccountState] = useState<LastAccount | null>(null);
+
+  useEffect(() => {
+    setLastAccountState(getLastAccount());
+  }, []);
+
   // Use propMode if provided, otherwise check searchParams, then fallback to path-based default
   const [authMode, setAuthMode] = useState<"login" | "signup">(
     propMode || 
@@ -115,11 +121,6 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
                         <>Place orders<br /><span className="text-muted-foreground/40">In seconds.</span></>
                       )}
                     </h1>
-                    <p className="text-muted-foreground text-lg max-w-sm leading-relaxed">
-                      {authMode === "login" 
-                        ? "Log in to access your favorites and track your active pickups."
-                        : "Create an account to start ordering from every shop on campus."}
-                    </p>
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -145,7 +146,22 @@ export function AuthLayout({ initialMode: propMode }: AuthLayoutProps) {
                   </motion.div>
                 )}
                 
-                <GoogleSignInButton mode={authMode} />
+                {lastAccount ? (
+                  <>
+                    <GoogleSignInButton
+                      mode={authMode}
+                      loginHint={lastAccount.email}
+                      label={`Continue as ${lastAccount.name || lastAccount.email}`}
+                    />
+                    <GoogleSignInButton
+                      mode={authMode}
+                      variant="subtle"
+                      label="Use another account"
+                    />
+                  </>
+                ) : (
+                  <GoogleSignInButton mode={authMode} />
+                )}
                 
                 {authMode === "login" ? (
                   <p className="text-center text-sm text-muted-foreground">

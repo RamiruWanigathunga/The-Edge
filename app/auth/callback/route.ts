@@ -29,8 +29,5 @@ export async function GET(request: Request) {
     }
   }
 
-  const response = NextResponse.redirect(new URL(next, requestUrl.origin));
-  // Ensure the user is marked as onboarded after a successful login/callback
-  response.cookies.set("edge-onboarded", "true", { path: "/", maxAge: 31536000 });
-  return response;
+  return NextResponse.redirect(new URL(next, requestUrl.origin));
 }

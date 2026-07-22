@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { 
-  Bell, Shield, LogOut, ChevronRight, Moon, Sun, 
+  Bell, LogOut, ChevronRight, Moon, Sun,
   BadgeCheck, Pencil, CreditCard, Heart, 
   HelpCircle, MessageSquare, FileText, ExternalLink, Check,
   Trophy, Star, Crown, Zap, Medal, Store, ArrowRight
@@ -14,6 +14,7 @@ import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
 import { useSupabaseUser, useProfile, useUserOrders, useMyApprovedShops } from "@/lib/supabase/hooks";
 import { updateProfile } from "@/lib/supabase/data";
 import { useSignOut } from "@/lib/supabase/useSignOut";
+import { DeleteAccountButton } from "@/components/auth/DeleteAccountButton";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Footer } from "@/components/layout/Footer";
@@ -78,7 +79,7 @@ export default function ProfilePage() {
   const progress = Math.min(100, ((profile?.totalOrders || 0) / tierInfo.next) * 100);
 
   return (
-    <div className="flex-1 bg-[#F8F9FA] dark:bg-background flex flex-col">
+    <div className="flex-1 bg-background flex flex-col">
       <main className="container mx-auto px-4 py-8 md:pt-28 md:py-12 pb-24 flex-1">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 lg:gap-12">
           
@@ -223,7 +224,6 @@ export default function ProfilePage() {
                 {[
                   { icon: Bell, label: "Notifications", sub: "Control your alerts" },
                   { icon: CreditCard, label: "Payment Methods", sub: "Manage your cards" },
-                  { icon: Shield, label: "Privacy & Security", sub: "Data protection" },
                   { icon: HelpCircle, label: "Help Center", sub: "FAQs and guides" },
                 ].map((item, idx, arr) => (
                   <button 
@@ -255,6 +255,8 @@ export default function ProfilePage() {
               <LogOut className="w-5 h-5" />
               {isSigningOut ? "Signing Out..." : "Sign Out"}
             </button>
+
+            <DeleteAccountButton redirectTo="/auth" />
           </div>
         </div>
       </main>

@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation";
 import { PWABanner } from "@/components/layout/PWABanner";
 import { ShopCard } from "@/components/shop/ShopCard";
 import { FoodCard } from "@/components/shop/FoodCard";
-import { useMenuItems, useServerFavorites, useShops, useSupabaseUser } from "@/lib/supabase/hooks";
-import { useProfile } from "@/store/profile";
+import { useMenuItems, useServerFavorites, useShops, useSupabaseUser, useProfile } from "@/lib/supabase/hooks";
 import { NotificationLink } from "@/components/layout/NotificationLink";
 
 export default function HomePage() {
@@ -18,7 +17,13 @@ export default function HomePage() {
   const { data: items = [] } = useMenuItems();
   const { data: user } = useSupabaseUser();
   const { data: favorites = [] } = useServerFavorites(user?.id);
-  const { name } = useProfile();
+  const { data: profile } = useProfile(user?.id);
+  const displayName =
+    profile?.displayName ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Guest";
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -51,10 +56,10 @@ export default function HomePage() {
           <div className="animate-fade-up">
             {/* Profile Greeting */}
             <div className="flex items-center justify-between mb-8 md:hidden">
-              <div>
+              <Link href="/profile">
                 <div className="text-[13px] text-muted-foreground font-medium">{greeting}</div>
-                <div className="text-lg font-semibold leading-tight text-foreground">{name.split(' ')[0]}</div>
-              </div>
+                <div className="text-lg font-semibold leading-tight text-foreground">{displayName.split(' ')[0]}</div>
+              </Link>
               <NotificationLink className="w-7 h-7 hover:opacity-80" iconClassName="w-6 h-6" />
             </div>
 

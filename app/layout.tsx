@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
@@ -66,10 +67,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${inter.variable} ${jetbrainsMono.variable} bg-background`}
       suppressHydrationWarning
     >
-      <body className="antialiased font-sans">
+      <body className="antialiased font-sans bg-background">
+        <Script
+          id="theme-color-sync-blocking"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}var c=t==='dark'?'#000000':'#ffffff';var metas=document.querySelectorAll('meta[name="theme-color"]');if(metas.length){metas.forEach(function(m){m.removeAttribute('media');m.setAttribute('content',c);});}else{var m=document.createElement('meta');m.setAttribute('name','theme-color');m.setAttribute('content',c);document.head.appendChild(m);}}catch(e){}})();`,
+          }}
+        />
         <Providers>
           <ServiceWorkerRegister />
           <LayoutWrapper>

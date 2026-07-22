@@ -5,14 +5,12 @@ import { useRouter } from "next/navigation";
 import { ExternalLink, ChevronRight, X, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/store/cart";
-import { useProfile } from "@/store/profile";
 import { useCreateOrder, useShops, useSupabaseUser, useProfile as useProfileData } from "@/lib/supabase/hooks";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function CheckoutPage() {
   const { items, clearShop, groupedByShop } = useCart();
-  const { name: profileName } = useProfile();
   const { data: user } = useSupabaseUser();
   const { data: dbProfile } = useProfileData(user?.id);
   const { data: shops } = useShops();
@@ -25,11 +23,10 @@ export default function CheckoutPage() {
   const groupedMap = groupedByShop();
   const shopIds = Array.from(groupedMap.keys());
 
-  const customerDisplayName = 
-    dbProfile?.displayName || 
-    user?.user_metadata?.full_name || 
-    user?.user_metadata?.name || 
-    (profileName && profileName.trim() ? profileName : null) || 
+  const customerDisplayName =
+    dbProfile?.displayName ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
     (user?.email ? user.email.split('@')[0] : "Customer");
   
   const handleStartPayment = (shopId: string) => {
@@ -96,67 +93,118 @@ export default function CheckoutPage() {
     );
   }
 
+  const grandTotal = shopIds.reduce((sum, shopId) => {
+    const shopItems = groupedMap.get(shopId) || [];
+    return sum + shopItems.reduce((n, c) => n + c.qty * c.item.price, 0);
+  }, 0);
+  const isSingleShop = shopIds.length === 1;
+
   return (
     <div className="flex-1 bg-background pb-24">
-      <div className="container mx-auto px-4 py-8 md:pt-28 max-w-2xl">
-        <div className="label-mono mb-2 text-primary">Sequential Checkout</div>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-8">Process Payments</h1>
+      <div className="container mx-auto px-4 py-8 md:pt-28 max-w-4xl grid lg:grid-cols-[1fr_360px] gap-8">
+        {/* Left: per-shop payment cards */}
+        <div>
+          <div className="label-mono mb-2 text-primary">Sequential Checkout</div>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-8">Process Payments</h1>
 
-        <div className="space-y-6">
-          {shopIds.map((shopId) => {
-            const shop = shops?.find(s => s.id === shopId);
-            const shopItems = groupedMap.get(shopId) || [];
-            const subtotal = shopItems.reduce((n, c) => n + c.qty * c.item.price, 0);
+          <div className="space-y-6">
+            {shopIds.map((shopId) => {
+              const shop = shops?.find(s => s.id === shopId);
+              const shopItems = groupedMap.get(shopId) || [];
+              const subtotal = shopItems.reduce((n, c) => n + c.qty * c.item.price, 0);
 
-            if (!shop) return null;
+              if (!shop) return null;
 
-            return (
-              <motion.div 
-                key={shopId}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-3xl border border-border bg-card overflow-hidden"
-              >
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{shop.emoji}</span>
-                      <div>
-                        <h2 className="font-bold text-lg">{shop.name}</h2>
-                        <p className="text-xs text-muted-foreground">{shopItems.length} items</p>
+              return (
+                <motion.div
+                  key={shopId}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-3xl border border-border bg-card overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{shop.emoji}</span>
+                        <div>
+                          <h2 className="font-bold text-lg">{shop.name}</h2>
+                          <p className="text-xs text-muted-foreground">{shopItems.length} items</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono font-bold text-xl text-primary">Rs {subtotal}</div>
+                        <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Subtotal</div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="font-mono font-bold text-xl text-primary">Rs {subtotal}</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Subtotal</div>
+
+                    <div className="space-y-2 mb-6">
+                      {shopItems.map((c) => (
+                        <div key={c.item.id} className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">
+                            {c.qty}× {c.item.title}
+                            {c.notes && <span className="text-[10px] block italic">&ldquo;{c.notes}&rdquo;</span>}
+                          </span>
+                          <span className="font-mono text-muted-foreground">Rs {c.qty * c.item.price}</span>
+                        </div>
+                      ))}
                     </div>
+
+                    {/* With a single shop, the primary action lives in the summary sidebar instead */}
+                    {!isSingleShop && (
+                      <Button
+                        onClick={() => handleStartPayment(shopId)}
+                        className="w-full pill bg-foreground text-background hover:bg-foreground/90 h-11"
+                      >
+                        Pay for {shop.name} <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    )}
                   </div>
-
-                  <div className="space-y-2 mb-6">
-                    {shopItems.map((c) => (
-                      <div key={c.item.id} className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">
-                          {c.qty}× {c.item.title}
-                          {c.notes && <span className="text-[10px] block italic">&ldquo;{c.notes}&rdquo;</span>}
-                        </span>
-                        <span className="font-mono text-muted-foreground">Rs {c.qty * c.item.price}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Button 
-                    onClick={() => handleStartPayment(shopId)}
-                    className="w-full pill bg-foreground text-background hover:bg-foreground/90 h-11"
-                  >
-                    Pay for {shop.name} <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-              </motion.div>
-            );
-          })}
-
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Right: sticky order summary */}
+        <aside className="h-fit">
+          <div className="sticky top-24 rounded-[2.5rem] border border-border bg-card p-8">
+            <div className="label-mono mb-4 text-primary">Order Summary</div>
+
+            <div className="space-y-4 mb-8">
+              {shopIds.map((shopId) => {
+                const shop = shops?.find(s => s.id === shopId);
+                const shopItems = groupedMap.get(shopId) || [];
+                const sub = shopItems.reduce((n, c) => n + c.qty * c.item.price, 0);
+                return (
+                  <div key={shopId} className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{shop?.emoji}</span>
+                      <span className="text-sm font-semibold text-muted-foreground">{shop?.name}</span>
+                    </div>
+                    <span className="font-mono font-bold text-sm">Rs {sub}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="space-y-1 mb-6">
+              <div className="flex justify-between items-baseline">
+                <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Grand Total</span>
+                <span className="font-mono text-2xl font-black text-primary">Rs {grandTotal}</span>
+              </div>
+            </div>
+
+            {isSingleShop && shops?.find(s => s.id === shopIds[0]) && (
+              <Button
+                onClick={() => handleStartPayment(shopIds[0])}
+                className="w-full pill bg-foreground text-background hover:bg-foreground/90 h-11"
+              >
+                Pay for {shops.find(s => s.id === shopIds[0])?.name} <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            )}
+          </div>
+        </aside>
       </div>
 
       {/* Payment Step Modal */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Briefcase, LayoutDashboard, ShieldCheck, ArrowRight, Store } from "lucide-react";
@@ -8,11 +8,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useSupabaseUser, useMyApprovedShops } from "@/lib/supabase/hooks";
+import { getLastAccount, type LastAccount } from "@/lib/lastAccount";
 
 export default function VendorLoginPage() {
   const router = useRouter();
   const { data: user } = useSupabaseUser();
   const { data: shops = [], isLoading: shopsLoading } = useMyApprovedShops(user?.id);
+  const [lastAccount, setLastAccountState] = useState<LastAccount | null>(null);
+
+  useEffect(() => {
+    setLastAccountState(getLastAccount());
+  }, []);
 
   useEffect(() => {
     if (user && !shopsLoading && shops.length > 0) {
@@ -55,9 +61,6 @@ export default function VendorLoginPage() {
                   Manage your shop.<br />
                   <span className="text-muted-foreground/40 font-medium">Grow your sales.</span>
                 </h1>
-                <p className="text-muted-foreground text-lg max-w-sm leading-relaxed">
-                  Access your kitchen dashboard to manage live orders, update menus, and track your campus performance.
-                </p>
               </div>
 
               <div className="space-y-6">
@@ -79,6 +82,21 @@ export default function VendorLoginPage() {
                       Go to Vendor Dashboard <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
+                ) : lastAccount ? (
+                  <>
+                    <GoogleSignInButton
+                      callbackNextPath="/vendor"
+                      mode="login"
+                      loginHint={lastAccount.email}
+                      label={`Continue as ${lastAccount.name || lastAccount.email}`}
+                    />
+                    <GoogleSignInButton
+                      callbackNextPath="/vendor"
+                      mode="login"
+                      variant="subtle"
+                      label="Use another account"
+                    />
+                  </>
                 ) : (
                   <GoogleSignInButton callbackNextPath="/vendor" mode="login" />
                 )}
@@ -91,12 +109,8 @@ export default function VendorLoginPage() {
             </div>
           </main>
 
-          <footer className="flex justify-between items-center text-[10px] text-muted-foreground/40 mt-auto pt-8">
-            <p>© 2026 The Edge · Vendor Services</p>
-            <div className="flex gap-6">
-              <Link href="/terms" className="hover:text-foreground transition-colors uppercase tracking-widest font-medium">Terms</Link>
-              <Link href="/auth" className="hover:text-foreground transition-colors uppercase tracking-widest font-medium">Customer Login</Link>
-            </div>
+          <footer className="flex justify-end items-center text-[10px] text-muted-foreground/40 mt-auto pt-8">
+            <Link href="/auth" className="hover:text-foreground transition-colors uppercase tracking-widest font-medium">Customer Login</Link>
           </footer>
         </motion.div>
 

@@ -138,7 +138,7 @@ export default function OrdersPage() {
     <div className="flex-1 bg-background flex flex-col">
       <main
         className={`flex-1 container mx-auto px-4 max-w-3xl ${
-          isEmpty ? "py-20 md:pt-36" : "pt-8 pb-24 md:pb-32 md:pt-28"
+          isEmpty ? "flex flex-col items-center justify-center pb-16 md:pb-24" : "pt-8 pb-24 md:pb-32 md:pt-28"
         }`}
       >
         {(hasAnyOrders || isLoading) && (
@@ -336,7 +336,7 @@ export default function OrdersPage() {
               <img src="/icons/bill-line-black.svg" alt="" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
               <img src="/icons/bill-line-white.svg" alt="" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
             </div>
-            <h2 className="text-3xl font-bold tracking-tight">No orders found</h2>
+            <h2 className="text-3xl font-bold tracking-tight">No orders yet</h2>
             <p className="text-muted-foreground mt-2 max-w-sm mx-auto">
               Your order history will appear here once you place an order.
             </p>
@@ -344,7 +344,7 @@ export default function OrdersPage() {
               href="/browse"
               className="inline-flex mt-8 pill bg-foreground text-background px-6 py-2.5 text-sm font-bold focus-dashed hover:bg-foreground/90 transition-colors"
             >
-              Start shopping
+              Start an order
             </Link>
           </div>
         )}

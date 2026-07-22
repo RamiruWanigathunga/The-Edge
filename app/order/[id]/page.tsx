@@ -3,11 +3,9 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Check, ChefHat, Bell, ArrowRight, ArrowLeft, RotateCcw, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, ChefHat, Bell, ArrowRight, ArrowLeft, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
 import { ReceiptCard } from "@/components/ui/ReceiptCard";
 import { useLiveOrder, useUserOrders, useSupabaseUser } from "@/lib/supabase/hooks";
-import { useCart } from "@/store/cart";
-import { toast } from "sonner";
 
 type Stage = 0 | 1 | 2;
 
@@ -27,7 +25,6 @@ export default function OrderStatusPage() {
   const { data: allOrders = [] } = useUserOrders(user?.id);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [expired, setExpired] = useState(false);
-  const { add } = useCart();
   const { data: liveOrder, isLoading: isLiveLoading } = useLiveOrder(rawId);
 
   // Swipe tracking
@@ -154,24 +151,6 @@ export default function OrderStatusPage() {
     );
   }
 
-  const handleReorder = () => {
-    order.items.forEach((c: any) => {
-      add({
-        id: c.id,
-        shopId: order.shopId,
-        title: c.title,
-        price: c.price,
-        description: "",
-        image: c.image,
-        category: "",
-        dietaryTags: [],
-        estimatedPrepTime: "",
-        isAvailable: true
-      }, c.qty, { notes: c.notes, dining: c.dining as "dine-in" | "takeaway" });
-    });
-    toast.success("Items added to cart!");
-  };
-
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < allOrders.length - 1;
 
@@ -269,15 +248,8 @@ export default function OrderStatusPage() {
 
         {/* Actions */}
         <div className="mt-8 flex flex-wrap gap-3">
-          <button
-            id="reorder-btn"
-            onClick={handleReorder}
-            className="inline-flex items-center gap-2 pill border border-border px-6 py-2.5 font-bold hover:bg-secondary transition-smooth focus-dashed text-sm"
-          >
-            <RotateCcw className="w-4 h-4" /> Reorder
-          </button>
           <Link
-            href="/"
+            href="/browse"
             className="inline-flex items-center gap-2 pill bg-foreground text-background px-6 py-2.5 font-bold hover:bg-foreground/90 transition-smooth focus-dashed text-sm"
           >
             Order more <ArrowRight className="w-4 h-4" />

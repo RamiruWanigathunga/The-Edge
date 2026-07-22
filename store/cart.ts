@@ -13,7 +13,8 @@ type CartState = {
   items: CartEntry[];
   favorites: string[];
   recentlyViewed: string[];
-  
+  isDrawerOpen: boolean;
+
   // Cart Actions
   add: (
     item: MenuItem,
@@ -30,10 +31,15 @@ type CartState = {
 
   // Favorites Actions
   toggleFav: (itemId: string) => void;
-  
+
   // Navigation History
   addRecentlyViewed: (shopId: string) => void;
-  
+
+  // Drawer (desktop cart slide-over)
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  toggleDrawer: () => void;
+
   // Selectors
   count: () => number;
   total: () => number;
@@ -45,6 +51,7 @@ export const useCart = create<CartState>()(
     items: [],
     favorites: [],
     recentlyViewed: [],
+    isDrawerOpen: false,
 
     add: (item, qty = 1, opts) => {
       const state = get();
@@ -139,6 +146,10 @@ export const useCart = create<CartState>()(
         const filtered = s.recentlyViewed.filter((id) => id !== shopId);
         return { recentlyViewed: [shopId, ...filtered].slice(0, 5) };
       }),
+
+    openDrawer: () => set({ isDrawerOpen: true }),
+    closeDrawer: () => set({ isDrawerOpen: false }),
+    toggleDrawer: () => set((s) => ({ isDrawerOpen: !s.isDrawerOpen })),
 
     count: () => get().items.reduce((n, c) => n + c.qty, 0),
 

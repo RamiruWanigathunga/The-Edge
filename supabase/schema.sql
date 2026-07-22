@@ -43,6 +43,8 @@ create table public.shops (
   available_time_slots jsonb not null default '{"default": ["ASAP"]}'::jsonb,
   opening_time time not null default '08:00:00',
   closing_time time not null default '22:00:00',
+  owner_name text, -- captured at application time, for admin contact reference
+  contact_email text, -- captured at application time, for admin contact reference
   created_at timestamptz not null default now()
 );
 
@@ -129,23 +131,6 @@ create table public.user_favorites (
 );
 
 
--- Shop Registrations (applications)
-create table public.shop_registrations (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references auth.users(id) on delete cascade,
-  shop_name text not null,
-  slug text not null unique,
-  owner_name text not null,
-  email text not null,
-  payment_link text not null,
-  description text,
-  category text,
-  logo_url text,
-  banner_url text,
-  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
-  created_at timestamptz not null default now()
-);
-
 -- App Settings
 create table public.app_settings (
   key text primary key,
@@ -162,11 +147,11 @@ values (
 )
 on conflict (key) do nothing;
 
-create unique index shop_registrations_one_pending_per_user
-on public.shop_registrations (user_id)
+-- A user can only have one shop application pending review at a time
+create unique index shops_one_pending_per_owner
+on public.shops (owner_id)
 where status = 'pending';
 
-create index shop_registrations_user_id_idx on public.shop_registrations (user_id);
 create index shops_owner_id_idx on public.shops (owner_id);
 create index menu_items_shop_id_idx on public.menu_items (shop_id);
 create index orders_user_id_idx on public.orders (user_id);
@@ -387,84 +372,52 @@ create trigger on_cart_update
 before update on public.user_cart
 for each row execute function public.handle_cart_updated_at();
 
--- Admin helper: approve a registration and create the live shop
-create or replace function private.approve_shop_registration(p_registration_id uuid)
-returns uuid
+-- Admin helper: approve a pending shop application
+create or replace function private.approve_shop(p_shop_id uuid)
+returns void
 language plpgsql
 security definer
 set search_path = public, private
 as $$
 declare
-  v_registration public.shop_registrations%rowtype;
-  v_shop_id uuid;
+  v_shop public.shops%rowtype;
   v_letter_code text;
 begin
   select *
-  into v_registration
-  from public.shop_registrations
-  where id = p_registration_id
+  into v_shop
+  from public.shops
+  where id = p_shop_id
     and status = 'pending'
   for update;
 
   if not found then
-    raise exception 'Pending shop registration not found';
+    raise exception 'Pending shop not found';
   end if;
 
-  v_letter_code := upper(
-    left(regexp_replace(v_registration.shop_name, '[^a-zA-Z0-9]+', '', 'g'), 2)
+  v_letter_code := coalesce(
+    nullif(v_shop.letter_code, ''),
+    upper(left(regexp_replace(v_shop.name, '[^a-zA-Z0-9]+', '', 'g'), 2))
   );
 
-  insert into public.shops (
-    owner_id,
-    slug,
-    name,
-    tagline,
-    description,
-    logo_url,
-    banner_url,
-    categories,
-    payment_link,
-    letter_code,
-    is_approved,
-    status
-  ) values (
-    v_registration.user_id,
-    v_registration.slug,
-    v_registration.shop_name,
-    v_registration.category,
-    v_registration.description,
-    v_registration.logo_url,
-    v_registration.banner_url,
-    case
-      when v_registration.category is null or v_registration.category = '' then null
-      else array[v_registration.category]
-    end,
-    v_registration.payment_link,
-    coalesce(nullif(v_letter_code, ''), 'XX'),
-    true,
-    'approved'
-  )
-  returning id into v_shop_id;
-
-  update public.shop_registrations
-  set status = 'approved'
-  where id = p_registration_id;
-
-  return v_shop_id;
+  update public.shops
+  set is_approved = true,
+      status = 'approved',
+      letter_code = coalesce(nullif(v_letter_code, ''), 'XX')
+  where id = p_shop_id;
 end;
 $$;
 
--- Admin helper: reject a pending registration
-create or replace function private.reject_shop_registration(p_registration_id uuid)
+-- Admin helper: reject a pending shop application
+create or replace function private.reject_shop(p_shop_id uuid)
 returns void
 language plpgsql
 security definer
 set search_path = public, private
 as $$
 begin
-  update public.shop_registrations
+  update public.shops
   set status = 'rejected'
-  where id = p_registration_id
+  where id = p_shop_id
     and status = 'pending';
 end;
 $$;
@@ -507,7 +460,6 @@ alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
 alter table public.user_cart enable row level security;
 alter table public.user_favorites enable row level security;
-alter table public.shop_registrations enable row level security;
 alter table public.app_settings enable row level security;
 
 -- Profiles: Users can read/update their own
@@ -535,6 +487,24 @@ create policy "Approved owners can update own shops" on public.shops
   for update to authenticated
   using (auth.uid() = owner_id and is_approved = true and status = 'approved')
   with check (auth.uid() = owner_id and is_approved = true and status = 'approved');
+
+-- Shops: applicants can submit their own pending application (while registration is open),
+-- and can read their own row regardless of approval status to check on it
+create policy "Applicants can submit own pending shop" on public.shops
+  for insert to authenticated
+  with check (
+    auth.uid() = owner_id
+    and is_approved = false
+    and status = 'pending'
+    and exists (
+      select 1 from public.app_settings
+      where key = 'shop_registration_enabled'
+        and value = 'true'::jsonb
+    )
+  );
+create policy "Applicants can read own shop application" on public.shops
+  for select to authenticated
+  using (auth.uid() = owner_id);
 
 -- Menu Items: public only sees available items from approved shops; approved owners manage their menus
 create policy "Public can read available menu items from approved shops" on public.menu_items
@@ -698,25 +668,26 @@ create policy "Users can manage own favorites" on public.user_favorites
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
--- Registrations: logged-in users can apply only while the Supabase flag is enabled
-create policy "Applicants can submit own pending registration when enabled" on public.shop_registrations
-  for insert to authenticated
-  with check (
-    auth.uid() = user_id
-    and status = 'pending'
-    and exists (
-      select 1 from public.app_settings
-      where key = 'shop_registration_enabled'
-        and value = 'true'::jsonb
-    )
-  );
-create policy "Applicants can read own registration" on public.shop_registrations
-  for select to authenticated
-  using (auth.uid() = user_id);
+revoke delete on public.shops from authenticated;
 
-revoke insert, delete on public.shops from authenticated;
+revoke insert on public.shops from authenticated;
+grant insert (
+  owner_id,
+  slug,
+  name,
+  tagline,
+  description,
+  payment_link,
+  logo_url,
+  banner_url,
+  categories,
+  owner_name,
+  contact_email
+) on public.shops to authenticated;
+
 revoke update on public.shops from authenticated;
 grant update (
+  name,
   tagline,
   description,
   emoji,

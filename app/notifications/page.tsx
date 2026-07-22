@@ -47,6 +47,7 @@ export default function NotificationsPage() {
     setClearedIds(ids);
     if (user?.id) {
       localStorage.setItem(`edge-cleared-notifications-${user.id}`, JSON.stringify([...ids]));
+      window.dispatchEvent(new Event("edge-cleared-notifications-updated"));
     }
   };
 
@@ -81,7 +82,7 @@ export default function NotificationsPage() {
   if (isLoading) {
     return (
       <div className={pageClassName}>
-        <div className="flex-1 container mx-auto px-4 py-20 md:pt-36 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center container mx-auto px-4 pb-16 md:pb-24 text-center">
           <div className="animate-pulse inline-flex items-center gap-2 text-muted-foreground font-medium">
             <div className="w-1.5 h-1.5 rounded-full bg-current" />
             <div className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -96,7 +97,7 @@ export default function NotificationsPage() {
   if (notifications.length === 0) {
     return (
       <div className={pageClassName}>
-        <div className="flex-1 container mx-auto px-4 py-20 md:pt-36 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center container mx-auto px-4 pb-16 md:pb-24 text-center">
           <div className="relative w-16 h-16 mx-auto mb-6">
             <img src="/icons/notification-line-black.svg" alt="" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
             <img src="/icons/notification-line-white.svg" alt="" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />

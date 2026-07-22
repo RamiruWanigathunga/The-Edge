@@ -7,7 +7,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { useShopRegistrationEnabled, useSupabaseUser } from "@/lib/supabase/hooks";
-import { submitShopRegistration } from "@/lib/supabase/data";
+import { submitShopApplication } from "@/lib/supabase/data";
 
 const shopCategories = ["Rice & Meals", "Snacks", "Beverages", "Desserts", "Coffee", "Juice", "Bakery", "Other"];
 
@@ -32,7 +32,7 @@ export default function ShopRegistrationPage() {
   const { data: registrationEnabled, isLoading: settingsLoading } = useShopRegistrationEnabled();
 
   const registrationMutation = useMutation({
-    mutationFn: (params: Parameters<typeof submitShopRegistration>[0]) => submitShopRegistration(params),
+    mutationFn: (params: Parameters<typeof submitShopApplication>[0]) => submitShopApplication(params),
     onSuccess: () => {
       setSubmitted(true);
       toast.success("Registration submitted. Pending review.");

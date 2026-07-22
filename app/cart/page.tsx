@@ -1,18 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Minus, Plus, Trash2, ArrowRight, Clock, AlertCircle } from "lucide-react";
-import { useCart, CartEntry } from "@/store/cart";
+import { ArrowRight, AlertCircle, ReceiptText } from "lucide-react";
+import { useCart } from "@/store/cart";
 import { useShops } from "@/lib/supabase/hooks";
-import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { CartShopSection } from "@/components/cart/CartShopSection";
 
-const pickupSlots = ["ASAP", "+15 min", "+30 min", "+1 hr", "+2 hr"];
+function OrderHistoryLink() {
+  return (
+    <Link
+      href="/orders"
+      className="inline-flex items-center gap-1.5 pill border border-border px-3 py-1.5 text-xs font-bold hover:bg-secondary transition-colors focus-dashed shrink-0"
+    >
+      <ReceiptText className="w-3.5 h-3.5" /> Order history
+    </Link>
+  );
+}
 
 export default function CartPage() {
-  const { items, setQty, remove, setNotes, setDining, setScheduledSlot, total, groupedByShop } = useCart();
+  const { items, total, groupedByShop } = useCart();
   const { data: shops = [] } = useShops();
   const router = useRouter();
 
@@ -22,7 +29,10 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="flex-1 bg-background flex flex-col">
-        <div className="flex-1 container mx-auto px-4 py-20 md:pt-36 text-center">
+        <div className="flex justify-end container mx-auto px-4 pt-6 md:pt-24">
+          <OrderHistoryLink />
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center container mx-auto px-4 pb-16 md:pb-24 text-center">
           <div className="relative w-16 h-16 mx-auto mb-6">
             <img src="/icons/cart-new-black.svg" alt="" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
             <img src="/icons/cart-new-white.svg" alt="" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
@@ -47,8 +57,11 @@ export default function CartPage() {
       <div className="flex-1 container mx-auto px-4 pt-8 pb-24 md:pb-32 md:pt-28 grid lg:grid-cols-[1fr_380px] gap-12">
         {/* Left: cart items */}
         <div className="min-w-0">
-          <div className="label-mono mb-2 text-primary">
-            {groupedEntries.length > 1 ? "Multi-shop cart" : "Shop cart"}
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <div className="label-mono text-primary">
+              {groupedEntries.length > 1 ? "Multi-shop cart" : "Shop cart"}
+            </div>
+            <OrderHistoryLink />
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Review Order</h1>
           <p className="text-muted-foreground mt-1 text-sm max-w-lg">
@@ -59,137 +72,8 @@ export default function CartPage() {
             {groupedEntries.map(([shopId, list]) => {
               const shop = shops.find(s => s.id === shopId);
               if (!shop) return null;
-              
-              const subTotal = list.reduce((n, c) => n + c.qty * c.item.price, 0);
-              const commonSlot = list[0]?.scheduledSlot || "ASAP";
 
-              return (
-                <motion.div 
-                  key={shopId} 
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="rounded-[2.5rem] border border-border bg-card overflow-hidden"
-                >
-                  {/* Shop header */}
-                  <div className="px-6 py-5 bg-secondary/30 border-b border-border flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-background grid place-items-center text-2xl border border-border">
-                        {shop.emoji}
-                      </div>
-                      <div>
-                        <div className="font-bold tracking-tight">{shop.name}</div>
-                        <div className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold flex items-center gap-2">
-                          <span>{list.length} {list.length === 1 ? 'item' : 'items'}</span>
-                          <span>Prep: {shop.prepTime}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-mono font-bold text-lg">Rs {subTotal}</div>
-                    </div>
-                  </div>
-
-                  {/* Scheduling per shop */}
-                  <div className="px-6 py-4 bg-primary/[0.03] border-b border-border flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-muted-foreground shrink-0">
-                      <Clock className="w-3.5 h-3.5 text-primary" /> Pickup Time:
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {pickupSlots.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => list.forEach(item => setScheduledSlot(item.item.id, s))}
-                          className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
-                            commonSlot === s 
-                              ? "bg-primary text-primary-foreground border-primary" 
-                              : "bg-background text-muted-foreground border-border hover:border-primary/50"
-                          }`}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Items */}
-                  <div className="divide-y divide-border/50">
-                    {list.map((c) => (
-                      <div key={c.item.id} className="p-6 flex gap-6">
-                        <div className="relative w-24 h-24 flex-shrink-0 group">
-                          <Image
-                            src={c.item.image}
-                            alt={c.item.title}
-                            fill
-                            sizes="96px"
-                            className="rounded-2xl object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0 flex flex-col">
-                          <div className="flex items-start justify-between gap-3 mb-1">
-                            <div className="min-w-0">
-                              <div className="font-bold text-[16px] truncate">{c.item.title}</div>
-                              <div className="text-xs text-muted-foreground font-mono">
-                                Rs {c.item.price} per unit
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => remove(c.item.id)}
-                              className="text-muted-foreground hover:text-destructive p-2 hover:bg-destructive/5 rounded-full transition-all"
-                              aria-label="Remove item"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          <input
-                            value={c.notes ?? ""}
-                            onChange={(e) => setNotes(c.item.id, e.target.value)}
-                            placeholder="Add notes (extra spicy, no onions...)"
-                            className="mt-2 w-full text-xs px-4 py-2.5 rounded-xl bg-secondary/50 placeholder:text-muted-foreground focus:ring-1 focus:ring-primary focus:bg-background outline-none transition-all"
-                          />
-
-                          <div className="mt-4 flex items-center justify-between gap-4 flex-wrap">
-                            <div className="inline-flex rounded-full bg-secondary/80 p-1 text-[10px] font-bold uppercase tracking-wider border border-border">
-                              {(["takeaway", "dine-in"] as const).map((type) => (
-                                <button
-                                  key={type}
-                                  onClick={() => setDining(c.item.id, type)}
-                                  className={`px-4 py-1.5 rounded-full transition-all ${
-                                    c.dining === type 
-                                      ? "bg-background text-foreground" 
-                                      : "text-muted-foreground hover:text-foreground"
-                                  }`}
-                                >
-                                  {type.replace("-", " ")}
-                                </button>
-                              ))}
-                            </div>
-
-                            <div className="inline-flex items-center rounded-full bg-background border border-border overflow-hidden">
-                              <button
-                                onClick={() => setQty(c.item.id, c.qty - 1)}
-                                className="w-8 h-8 grid place-items-center hover:bg-secondary transition-colors"
-                              >
-                                <Minus className="w-3.5 h-3.5" />
-                              </button>
-                              <span className="font-mono font-black w-8 text-center text-sm">
-                                {c.qty}
-                              </span>
-                              <button
-                                onClick={() => setQty(c.item.id, c.qty + 1)}
-                                className="w-8 h-8 grid place-items-center hover:bg-secondary transition-colors"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              );
+              return <CartShopSection key={shopId} shop={shop} items={list} />;
             })}
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { setLastAccount } from "@/lib/lastAccount";
 import {
   createOrder,
   fetchAllMenuItems,
@@ -162,9 +163,11 @@ export function useUpdateShopHours(shopSlug?: string) {
   return useMutation({
     mutationFn: ({ shopId, openingTime, closingTime }: { shopId: string; openingTime: string; closingTime: string }) =>
       updateShopHours(shopId, openingTime, closingTime),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["vendor-shop", shopSlug] });
       queryClient.invalidateQueries({ queryKey: ["shops"] });
+      queryClient.invalidateQueries({ queryKey: ["shop", shopSlug] });
+      queryClient.invalidateQueries({ queryKey: ["shop-by-id", variables.shopId] });
     },
   });
 }
@@ -174,9 +177,11 @@ export function useUpdateShopDetails(shopSlug?: string) {
   return useMutation({
     mutationFn: ({ shopId, updates }: { shopId: string; updates: Parameters<typeof updateShopDetails>[1] }) =>
       updateShopDetails(shopId, updates),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["vendor-shop", shopSlug] });
       queryClient.invalidateQueries({ queryKey: ["shops"] });
+      queryClient.invalidateQueries({ queryKey: ["shop", shopSlug] });
+      queryClient.invalidateQueries({ queryKey: ["shop-by-id", variables.shopId] });
     },
   });
 }
@@ -388,6 +393,12 @@ export function useSupabaseUser() {
     queryFn: async () => {
       if (!supabase) return null;
       const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setLastAccount({
+          email: user.email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || undefined,
+        });
+      }
       return user;
     },
     staleTime: 5 * 60 * 1000,

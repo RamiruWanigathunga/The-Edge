@@ -8,9 +8,8 @@ A high-performance, real-time PWA for campus food discovery and ordering.
 ## Mechanics & Tech Stack
 
 ### Authentication System
-- **Sign Up (`/signup`)**: Standard Google OAuth. Creates a new profile in Supabase.
-- **Log In (`/login`)**: Verified Google OAuth. If no account exists, the session is rejected to prevent accidental duplicates.
-- **Vendor Access (`/vendor/login`)**: **Strictly Restricted.** Vendors must have their email manually added to the Supabase database by an administrator. There is no public "Vendor Sign Up" flow to ensure only authorized shops can access the platform.
+- **Sign Up (`/signup`) / Log In (`/login`)**: Both are the same Google OAuth flow (Supabase auto-creates a `profiles` row on first sign-in via the `handle_new_user` trigger) — a user can use either button at any time.
+- **Vendor Access (`/vendor/login`)**: Same Google account as above. Vendor dashboard access is granted purely by owning an approved `shops` row (`owner_id` + `is_approved=true` + `status='approved'`) — there's no separate vendor identity, so the same email works for both student ordering and, once approved, the vendor dashboard. New shops apply via `/shop-registration` and wait for admin approval (see Admin Management below).
 
 ### Real-time Data Sync
 - **Cart & Favorites**: Synced across devices instantly using Supabase Realtime.
@@ -41,8 +40,8 @@ A high-performance, real-time PWA for campus food discovery and ordering.
 
 ## Admin Management
 
-### Handling Shop Registrations
-When a user submits a request via `/shop-registration`, it enters a `pending` state. Admins must manually approve these requests to create a shop and grant vendor access.
+### Handling Shop Applications
+When a user submits a request via `/shop-registration`, it's inserted directly into `public.shops` with `status='pending'`, `is_approved=false` (there's no separate staging table — `shops` itself represents pending/approved/rejected). Admins must manually approve these to grant vendor access.
 
 #### 1. Open/Close Registration
 Run this in the Supabase SQL Editor:
@@ -52,18 +51,18 @@ Run this in the Supabase SQL Editor:
 #### 2. Approve a Shop
 Run one of the following queries in the Supabase SQL Editor:
 ```sql
--- Approve by registration ID
-SELECT private.approve_shop_registration('REGISTRATION_ID_HERE');
+-- Approve by shop ID
+SELECT private.approve_shop('SHOP_ID_HERE');
 
--- Or approve by shop slug
-SELECT private.approve_shop_registration(id)
-FROM public.shop_registrations
-WHERE slug = 'my-shop-slug';
+-- Or approve by slug
+SELECT private.approve_shop(id)
+FROM public.shops
+WHERE slug = 'my-shop-slug' AND status = 'pending';
 ```
-*This automatically creates the shop record and links the owner's user account.*
+*This flips `is_approved`/`status` on the same row and assigns a `letter_code` if it doesn't have one yet.*
 
 #### 3. Reject a Request
-Run in SQL Editor: `select private.reject_shop_registration('ID_HERE');`
+Run in SQL Editor: `select private.reject_shop('SHOP_ID_HERE');`
 
 ### Vendor Access Troubleshooting
 If a vendor is approved but cannot log in:
@@ -73,7 +72,7 @@ If a vendor is approved but cannot log in:
 ├── lib/                  # Core Utilities
 │   ├── supabase/         # Client/Server/Admin Supabase Helpers
 │   └── designSystem.ts   # Design Tokens & Palette
-├── store/                # Zustand State Management (Cart, Profile)
+├── store/                # Zustand State Management (Cart)
 └── supabase/             # Database Schema & Migrations
 ```
 

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Home, Compass, ShoppingBag, ReceiptText, User } from "lucide-react";
+import { Home, Compass, ShoppingBag, User } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { motion } from "framer-motion";
 
@@ -18,7 +18,6 @@ export const BottomNav = () => {
     { href: "/", label: "Home", icon: Home },
     { href: "/browse", label: "Browse", icon: Compass },
     { href: "/cart", label: "Cart", icon: ShoppingBag, badge: true },
-    { href: "/orders", label: "Orders", icon: ReceiptText },
     { href: "/profile", label: "Profile", icon: User },
   ];
 
@@ -37,8 +36,8 @@ export const BottomNav = () => {
               <div className="relative">
                 {link.label === "Cart" ? (
                   <div className="relative w-7 h-7 transition-all">
-                    <img src="/icons/cart-black.svg" alt="Cart" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
-                    <img src="/icons/cart-white.svg" alt="Cart" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
+                    <img src="/icons/cart-solid-black.svg" alt="Cart" className="w-full h-full dark:hidden object-contain" loading="eager" decoding="sync" />
+                    <img src="/icons/cart-solid-white.svg" alt="Cart" className="hidden w-full h-full dark:block object-contain" loading="eager" decoding="sync" />
                   </div>
                 ) : link.label === "Profile" ? (
                   <div className="relative w-7 h-7 transition-all">

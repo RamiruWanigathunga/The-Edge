@@ -854,7 +854,7 @@ export async function removeServerFavorite(userId: string, menuItemId: string) {
 // SHOP REGISTRATION
 // ---------------------------------------------------------------------------
 
-export async function submitShopRegistration(params: {
+export async function submitShopApplication(params: {
   userId: string;
   shopName: string;
   slug: string;
@@ -867,24 +867,22 @@ export async function submitShopRegistration(params: {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) throw new Error("Supabase is not configured");
 
-  console.log("Submitting shop registration for:", params.shopName);
-  const { error } = await supabase.from("shop_registrations").insert({
-    user_id: params.userId,
-    shop_name: params.shopName,
+  const { error } = await supabase.from("shops").insert({
+    owner_id: params.userId,
     slug: params.slug,
-    owner_name: params.ownerName,
-    email: params.email,
-    payment_link: params.paymentLink,
+    name: params.shopName,
+    tagline: params.category || null,
     description: params.description,
-    category: params.category,
-    status: "pending",
-  }).select();
+    payment_link: params.paymentLink,
+    categories: params.category ? [params.category] : null,
+    owner_name: params.ownerName,
+    contact_email: params.email,
+  });
 
   if (error) {
-    console.error("Supabase registration error:", error);
+    console.error("Shop application error:", error);
     throw error;
   }
-  console.log("Shop registration submitted successfully");
 }
 
 export async function fetchShopRegistrationEnabled(): Promise<boolean> {

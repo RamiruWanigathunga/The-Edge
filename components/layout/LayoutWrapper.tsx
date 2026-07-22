@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 import { OfflineBanner } from "@/components/ui/OfflineBanner";
 
@@ -67,6 +68,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
         </main>
       </div>
       <BottomNav />
+      <CartDrawer />
       <OfflineBanner />
     </div>
   );

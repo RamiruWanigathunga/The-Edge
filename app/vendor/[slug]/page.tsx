@@ -9,7 +9,7 @@ import {
   Plus, Pencil, Power, Users, Trash2,
   ArrowLeft, ToggleLeft, ToggleRight, Upload,
   Search, X, RotateCcw, Printer, ChevronRight,
-  Clock, MapPin, Hash, User
+  Clock, MapPin, Hash, User, SunMoon
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -408,8 +408,18 @@ export default function VendorDashboard() {
             </button>
           ))}
         </nav>
-        <div className="p-6 border-t border-border mt-auto">
-          <button onClick={signOut} disabled={isSigningOut} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 font-medium">
+        <div className="p-5 border-t border-border mt-auto space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+              <SunMoon className="w-4 h-4 text-primary" /> Theme
+            </span>
+            <ThemeToggle />
+          </div>
+          <button
+            onClick={signOut}
+            disabled={isSigningOut}
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 font-medium w-full px-1 pt-2 border-t border-border/60"
+          >
             <Power className="w-3.5 h-3.5" /> {isSigningOut ? "Signing out..." : "Sign out"}
           </button>
         </div>
@@ -919,17 +929,6 @@ export default function VendorDashboard() {
                       className="rounded-2xl"
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Theme Settings */}
-              <div className="rounded-3xl border border-border bg-card p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Appearance</h3>
-                    <p className="text-xs text-muted-foreground">Switch between light and dark theme modes</p>
-                  </div>
-                  <ThemeToggle />
                 </div>
               </div>
             </div>

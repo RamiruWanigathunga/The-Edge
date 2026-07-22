@@ -2,34 +2,23 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   ListOrdered,
   Utensils,
   BarChart3,
   Settings,
   RotateCcw,
-  Calendar,
   Download,
   ArrowUpRight,
   ArrowDownRight,
-  TrendingUp,
-  DollarSign,
-  ShoppingBag,
-  CreditCard,
-  PieChart as PieChartIcon,
   Clock,
-  CheckCircle2,
-  AlertCircle,
-  MoreVertical,
   ChevronDown,
   Power,
-  Layers,
-  Sparkles,
-  Users,
-  Store,
+  SunMoon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ResponsiveContainer,
   BarChart,
@@ -51,13 +40,13 @@ import {
   useVendorShop,
 } from "@/lib/supabase/hooks";
 import { useSignOut } from "@/lib/supabase/useSignOut";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 type ViewTab = "overview" | "sales" | "expenses";
 type Period = "monthly" | "weekly" | "daily" | "yearly";
 
 export default function VendorAnalyticsPage() {
   const params = useParams();
-  const router = useRouter();
   const slug = params?.slug as string;
 
   const { data: user, isLoading: userLoading } = useSupabaseUser();
@@ -67,7 +56,6 @@ export default function VendorAnalyticsPage() {
 
   const [viewTab, setViewTab] = useState<ViewTab>("overview");
   const [period, setPeriod] = useState<Period>("monthly");
-  const [salesRange, setSalesRange] = useState<"2weeks" | "1month" | "3months">("2weeks");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -87,131 +75,208 @@ export default function VendorAnalyticsPage() {
     }, 600);
   };
 
-  // Dynamic calculations combining real order data & baseline benchmarks
+  // 100% REAL DATA CALCULATIONS FROM DATABASE
   const analyticsData = useMemo(() => {
-    const totalRealRevenue = liveOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-    const realCount = liveOrders.length;
+    const totalRevenue = liveOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const totalSalesCount = liveOrders.length;
 
-    // Multipliers based on period
-    let multiplier = 1;
-    if (period === "monthly") multiplier = 1;
-    else if (period === "weekly") multiplier = 0.28;
-    else if (period === "daily") multiplier = 0.04;
-    else if (period === "yearly") multiplier = 12.4;
+    // Real platform & operation expense estimation (12% commission & packaging fee on real orders)
+    const totalExpenses = Math.round(totalRevenue * 0.12);
+    const totalProfit = totalRevenue - totalExpenses;
 
-    const baseRevenue = Math.max(totalRealRevenue * multiplier, 228441 * multiplier);
-    const baseSalesCount = Math.max(realCount * multiplier, Math.round(458 * multiplier));
-    const baseExpenses = Math.round(baseRevenue * 0.1098);
-    const baseProfit = Math.round(baseRevenue - baseExpenses);
+    const daysCount = period === "daily" ? 1 : period === "weekly" ? 7 : period === "monthly" ? 30 : 365;
+    const weeksCount = Math.max(1, Math.ceil(daysCount / 7));
 
-    // 1. Sales Performance Bar Chart Data
-    const salesPerformanceData = [
-      { date: "01", sales: Math.round(30 * multiplier), revenue: Math.round(1850 * multiplier) },
-      { date: "02", sales: Math.round(52 * multiplier), revenue: Math.round(3200 * multiplier) },
-      { date: "03", sales: Math.round(34 * multiplier), revenue: Math.round(2100 * multiplier) },
-      { date: "04", sales: Math.round(18 * multiplier), revenue: Math.round(1100 * multiplier) },
-      { date: "05", sales: Math.round(44 * multiplier), revenue: Math.round(2700 * multiplier) },
-      { date: "06", sales: Math.round(24 * multiplier), revenue: Math.round(1500 * multiplier) },
-      { date: "07", sales: Math.round(26 * multiplier), revenue: Math.round(1600 * multiplier) },
-      { date: "08", sales: Math.round(31 * multiplier), revenue: Math.round(1950 * multiplier) },
-      { date: "09", sales: Math.round(10 * multiplier), revenue: Math.round(650 * multiplier) },
-      { date: "10", sales: Math.round(43 * multiplier), revenue: Math.round(2650 * multiplier) },
-      { date: "11", sales: Math.round(38 * multiplier), revenue: Math.round(2300 * multiplier) },
-      { date: "12", sales: Math.round(32 * multiplier), revenue: Math.round(1980 * multiplier) },
+    const dailySalesAvg = totalSalesCount > 0 ? Math.round(totalRevenue / daysCount) : 0;
+    const weeklySalesAvg = totalSalesCount > 0 ? Math.round(totalRevenue / weeksCount) : 0;
+
+    // 1. REAL Sales Performance Bar Chart Data (Grouped by date/period)
+    const salesPerformanceMap: Record<string, { sales: number; revenue: number }> = {};
+    
+    // Initialize periods
+    if (period === "daily") {
+      for (let h = 8; h <= 22; h += 2) {
+        const key = `${h}:00`;
+        salesPerformanceMap[key] = { sales: 0, revenue: 0 };
+      }
+    } else {
+      for (let i = 1; i <= 12; i++) {
+        const key = i < 10 ? `0${i}` : `${i}`;
+        salesPerformanceMap[key] = { sales: 0, revenue: 0 };
+      }
+    }
+
+    liveOrders.forEach((order) => {
+      const createdDate = new Date(order.createdAt || Date.now());
+      let bucketKey = "";
+      if (period === "daily") {
+        const hour = Math.floor(createdDate.getHours() / 2) * 2;
+        bucketKey = `${hour}:00`;
+      } else if (period === "yearly") {
+        const monthNum = createdDate.getMonth() + 1;
+        bucketKey = monthNum < 10 ? `0${monthNum}` : `${monthNum}`;
+      } else {
+        const dayNum = createdDate.getDate();
+        bucketKey = dayNum < 10 ? `0${dayNum}` : `${dayNum}`;
+      }
+
+      if (!salesPerformanceMap[bucketKey]) {
+        salesPerformanceMap[bucketKey] = { sales: 0, revenue: 0 };
+      }
+      salesPerformanceMap[bucketKey].sales += 1;
+      salesPerformanceMap[bucketKey].revenue += order.total || 0;
+    });
+
+    const salesPerformanceData = Object.entries(salesPerformanceMap).map(([date, data]) => ({
+      date,
+      sales: data.sales,
+      revenue: data.revenue,
+    }));
+
+    // 2. REAL Traffic / Order Source Acquisition
+    const takeawayOrders = liveOrders.filter((o) =>
+      o.itemDetails?.some((it) => it.dining?.toLowerCase().includes("takeaway") || it.dining?.toLowerCase().includes("delivery"))
+    ).length;
+    const dineInOrders = totalSalesCount - takeawayOrders;
+
+    const monthsLabels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const trafficMap: Record<string, { organic: number; paid: number }> = {};
+    monthsLabels.forEach((m) => {
+      trafficMap[m] = { organic: 0, paid: 0 };
+    });
+
+    liveOrders.forEach((o) => {
+      const mName = monthsLabels[new Date(o.createdAt || Date.now()).getMonth()];
+      if (trafficMap[mName]) {
+        trafficMap[mName].organic += 1;
+        trafficMap[mName].paid += o.itemDetails?.length || 1;
+      }
+    });
+
+    const trafficData = monthsLabels.map((month) => ({
+      month,
+      organic: trafficMap[month].organic,
+      paid: trafficMap[month].paid,
+    }));
+
+    // 3. REAL Peak Hourly Orders Distribution
+    const hourlySlots = [
+      { hour: "8 AM", start: 8, end: 10, orders: 0 },
+      { hour: "10 AM", start: 10, end: 12, orders: 0 },
+      { hour: "12 PM", start: 12, end: 14, orders: 0 },
+      { hour: "2 PM", start: 14, end: 16, orders: 0 },
+      { hour: "4 PM", start: 16, end: 18, orders: 0 },
+      { hour: "6 PM", start: 18, end: 20, orders: 0 },
+      { hour: "8 PM", start: 20, end: 22, orders: 0 },
+      { hour: "10 PM", start: 22, end: 24, orders: 0 },
     ];
 
-    // 2. Traffic / Channel Acquisition Multi-line Data
-    const trafficData = [
-      { month: "Jan", organic: Math.round(1200 * multiplier), paid: Math.round(800 * multiplier) },
-      { month: "Feb", organic: Math.round(15000 * multiplier), paid: Math.round(10000 * multiplier) },
-      { month: "Mar", organic: Math.round(8000 * multiplier), paid: Math.round(12000 * multiplier) },
-      { month: "Apr", organic: Math.round(14000 * multiplier), paid: Math.round(14000 * multiplier) },
-      { month: "May", organic: Math.round(15000 * multiplier), paid: Math.round(8000 * multiplier) },
-      { month: "Jun", organic: Math.round(8000 * multiplier), paid: Math.round(9000 * multiplier) },
-      { month: "Jul", organic: Math.round(18000 * multiplier), paid: Math.round(12000 * multiplier) },
-      { month: "Aug", organic: Math.round(18000 * multiplier), paid: Math.round(10000 * multiplier) },
-      { month: "Sep", organic: Math.round(20000 * multiplier), paid: Math.round(5000 * multiplier) },
-      { month: "Oct", organic: Math.round(17000 * multiplier), paid: Math.round(11000 * multiplier) },
-      { month: "Nov", organic: Math.round(22000 * multiplier), paid: Math.round(18000 * multiplier) },
-      { month: "Dec", organic: Math.round(15000 * multiplier), paid: Math.round(9000 * multiplier) },
-    ];
+    liveOrders.forEach((o) => {
+      const hour = new Date(o.createdAt || Date.now()).getHours();
+      const slot = hourlySlots.find((s) => hour >= s.start && hour < s.end);
+      if (slot) slot.orders += 1;
+    });
 
-    // 3. Peak Hourly Orders Distribution
-    const hourlyData = [
-      { hour: "8 AM", orders: 12 },
-      { hour: "10 AM", orders: 28 },
-      { hour: "12 PM", orders: 94 }, // Lunch rush
-      { hour: "2 PM", orders: 62 },
-      { hour: "4 PM", orders: 35 },
-      { hour: "6 PM", orders: 110 }, // Dinner rush
-      { hour: "8 PM", orders: 85 },
-      { hour: "10 PM", orders: 32 },
-    ];
+    const hourlyData = hourlySlots.map(({ hour, orders }) => ({ hour, orders }));
 
-    // 4. Category Revenue Distribution
-    const categoryData = [
-      { name: "Mains & Bowls", value: 48, color: "#22c55e" },
-      { name: "Beverages", value: 24, color: "#4ade80" },
-      { name: "Desserts", value: 18, color: "#86efac" },
-      { name: "Snacks", value: 10, color: "#15803d" },
-    ];
+    // 4. REAL Category Revenue Distribution
+    const categoryTotals: Record<string, number> = {};
+    liveOrders.forEach((order) => {
+      (order.itemDetails || []).forEach((it) => {
+        const cat = menuItems.find((m) => m.title.toLowerCase() === it.title.toLowerCase())?.category || "Mains & Bowls";
+        categoryTotals[cat] = (categoryTotals[cat] || 0) + it.unitPrice * it.quantity;
+      });
+    });
 
-    // 5. Expense Breakdown
-    const expenseBreakdown = [
-      { name: "COGS & Ingredients", value: 62, color: "#ef4444" },
-      { name: "Platform Commissions", value: 16, color: "#f97316" },
-      { name: "Packaging & Supplies", value: 12, color: "#eab308" },
-      { name: "Staff & Labor", value: 10, color: "#3b82f6" },
-    ];
-
-    // 6. Top Selling Menu Items List
-    const topItems = menuItems.length > 0
-      ? menuItems.slice(0, 5).map((item, idx) => ({
-          id: item.id,
-          title: item.title,
-          category: item.category || "Main",
-          sales: Math.round((142 - idx * 22) * Math.max(1, realCount / 5)),
-          revenue: Math.round((item.price * (142 - idx * 22)) * Math.max(1, realCount / 5)),
-          growth: `+${(18.4 - idx * 2.5).toFixed(1)}%`,
-          isAvailable: item.isAvailable,
-          image: item.image || "/placeholder-food.jpg",
+    const catColors = ["#22c55e", "#4ade80", "#86efac", "#15803d", "#3b82f6"];
+    const categoryEntries = Object.entries(categoryTotals);
+    const categoryData = categoryEntries.length > 0
+      ? categoryEntries.map(([name, val], idx) => ({
+          name,
+          value: totalRevenue > 0 ? Math.round((val / totalRevenue) * 100) : 0,
+          color: catColors[idx % catColors.length],
         }))
-      : [
-          { id: "1", title: "Crispy Chicken Kottu", category: "Mains", sales: 184, revenue: 165600, growth: "+24.5%", isAvailable: true, image: "" },
-          { id: "2", title: "Iced Milo Special", category: "Beverages", sales: 142, revenue: 49700, growth: "+18.2%", isAvailable: true, image: "" },
-          { id: "3", title: "Cheese Butter Roti", category: "Snacks", sales: 98, revenue: 39200, growth: "+12.0%", isAvailable: true, image: "" },
-          { id: "4", title: "Spicy Seafood Noodles", category: "Mains", sales: 86, revenue: 103200, growth: "+9.4%", isAvailable: true, image: "" },
-          { id: "5", title: "Caramel Pudding", category: "Desserts", sales: 64, revenue: 22400, growth: "+5.1%", isAvailable: true, image: "" },
-        ];
+      : menuItems.length > 0
+      ? Array.from(new Set(menuItems.map((m) => m.category || "Main"))).map((cat, idx) => ({
+          name: cat,
+          value: Math.round(100 / Math.max(1, new Set(menuItems.map((m) => m.category || "Main")).size)),
+          color: catColors[idx % catColors.length],
+        }))
+      : [{ name: "General", value: 100, color: "#22c55e" }];
+
+    // 5. REAL Item Sales Ranking
+    const itemSalesMap: Record<string, { title: string; category: string; sales: number; revenue: number; image: string }> = {};
+
+    liveOrders.forEach((order) => {
+      (order.itemDetails || []).forEach((it) => {
+        if (!itemSalesMap[it.title]) {
+          const matchingItem = menuItems.find((m) => m.title.toLowerCase() === it.title.toLowerCase());
+          itemSalesMap[it.title] = {
+            title: it.title,
+            category: matchingItem?.category || "Main",
+            sales: 0,
+            revenue: 0,
+            image: it.imageUrl || matchingItem?.image || "",
+          };
+        }
+        itemSalesMap[it.title].sales += it.quantity;
+        itemSalesMap[it.title].revenue += it.unitPrice * it.quantity;
+      });
+    });
+
+    const rankedItems = Object.values(itemSalesMap)
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5);
+
+    const topItems = rankedItems.length > 0
+      ? rankedItems.map((item) => ({
+          id: item.title,
+          title: item.title,
+          category: item.category,
+          sales: item.sales,
+          revenue: item.revenue,
+          isAvailable: true,
+          image: item.image,
+        }))
+      : menuItems.slice(0, 5).map((m) => ({
+          id: m.id,
+          title: m.title,
+          category: m.category || "Main",
+          sales: 0,
+          revenue: 0,
+          isAvailable: m.isAvailable,
+          image: m.image,
+        }));
 
     return {
-      revenue: baseRevenue,
-      expenses: baseExpenses,
-      salesCount: baseSalesCount,
-      profit: baseProfit,
-      weeklySalesAvg: Math.round(28441 * multiplier),
-      dailySalesAvg: Math.round(4063 * multiplier),
-      totalSessions: Math.round(231856 * multiplier),
+      revenue: totalRevenue,
+      expenses: totalExpenses,
+      salesCount: totalSalesCount,
+      profit: totalProfit,
+      weeklySalesAvg,
+      dailySalesAvg,
+      takeawayOrders,
+      dineInOrders,
       salesPerformanceData,
       trafficData,
       hourlyData,
       categoryData,
-      expenseBreakdown,
       topItems,
     };
   }, [liveOrders, period, menuItems]);
 
-  // Export CSV functionality
+  // Export real CSV data
   const downloadCSV = () => {
     const headers = ["Metric", "Value", "Period"];
     const rows = [
-      ["Revenue", `$${analyticsData.revenue.toLocaleString()}`, period],
-      ["Expenses", `$${analyticsData.expenses.toLocaleString()}`, period],
-      ["Sales Count", analyticsData.salesCount.toString(), period],
-      ["Net Profit", `$${analyticsData.profit.toLocaleString()}`, period],
-      ["Weekly Sales Avg", `$${analyticsData.weeklySalesAvg.toLocaleString()}`, period],
-      ["Daily Sales Avg", `$${analyticsData.dailySalesAvg.toLocaleString()}`, period],
-      ["Total Traffic Sessions", analyticsData.totalSessions.toString(), period],
+      ["Total Revenue (LKR)", analyticsData.revenue.toString(), period],
+      ["Estimated Expenses (LKR)", analyticsData.expenses.toString(), period],
+      ["Total Sales Count", analyticsData.salesCount.toString(), period],
+      ["Net Profit (LKR)", analyticsData.profit.toString(), period],
+      ["Weekly Sales Avg (LKR)", analyticsData.weeklySalesAvg.toString(), period],
+      ["Daily Sales Avg (LKR)", analyticsData.dailySalesAvg.toString(), period],
+      ["Takeaway Orders", analyticsData.takeawayOrders.toString(), period],
+      ["Dine-In Orders", analyticsData.dineInOrders.toString(), period],
     ];
 
     const csvContent =
@@ -225,15 +290,15 @@ export default function VendorAnalyticsPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("CSV report downloaded!");
+    toast.success("Analytics CSV report downloaded!");
   };
 
   if (userLoading || shopLoading) {
     return (
-      <div className="flex-1 grid place-items-center bg-[#09090b] text-white min-h-screen">
+      <div className="flex-1 grid place-items-center bg-background text-foreground min-h-screen">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-          <p className="text-zinc-400 text-sm animate-pulse">Loading analytics engine...</p>
+          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm animate-pulse">Loading analytics engine...</p>
         </div>
       </div>
     );
@@ -241,11 +306,11 @@ export default function VendorAnalyticsPage() {
 
   if (!user || !shop) {
     return (
-      <div className="flex-1 grid place-items-center bg-[#09090b] text-white min-h-screen px-4">
-        <div className="max-w-md rounded-3xl border border-zinc-800 bg-zinc-900 p-8 text-center">
+      <div className="flex-1 grid place-items-center bg-background text-foreground min-h-screen px-4">
+        <div className="max-w-md rounded-3xl border border-border bg-card p-8 text-center">
           <h1 className="text-2xl font-bold tracking-tight">Access Restricted</h1>
-          <p className="text-zinc-400 mt-3 text-sm">Please sign in as an authorized shop vendor to view analytics.</p>
-          <Link href="/vendor/login" className="mt-6 inline-flex px-6 py-2.5 rounded-full bg-emerald-500 text-black font-bold text-sm">
+          <p className="text-muted-foreground mt-3 text-sm">Please sign in as an authorized shop vendor to view analytics.</p>
+          <Link href="/vendor/login" className="mt-6 inline-flex px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-bold text-sm">
             Sign in
           </Link>
         </div>
@@ -254,28 +319,29 @@ export default function VendorAnalyticsPage() {
   }
 
   return (
-    <div className="h-screen w-full bg-[#09090b] text-zinc-100 flex overflow-hidden font-sans">
+    <div className="h-screen w-full bg-background text-foreground flex overflow-hidden font-sans">
       {/* ── DESKTOP SIDEBAR ── */}
-      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-zinc-800 bg-[#0c0c0e] h-full z-30">
-        <div className="p-6 border-b border-zinc-800 bg-zinc-950/40">
+      <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r border-border bg-card/60 h-full z-30">
+        <div className="p-6 border-b border-border bg-card/50">
           <Link href="/" className="flex items-center gap-2 mb-8">
             <div className="w-8 h-8 rounded-xl hero-gradient grid place-items-center text-white font-bold text-sm">E</div>
-            <span className="font-bold tracking-tight text-white">The Edge</span>
+            <span className="font-bold tracking-tight">The Edge</span>
           </Link>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700/50 grid place-items-center text-2xl">
+            <div className="w-12 h-12 rounded-2xl bg-secondary border border-border grid place-items-center text-2xl">
               {shop.emoji}
             </div>
             <div className="min-w-0">
-              <div className="font-bold truncate text-sm text-white">{shop.name}</div>
-              <div className={`text-[10px] flex items-center gap-1.5 font-bold uppercase tracking-wider ${shop.isOpen ? "text-emerald-400" : "text-zinc-400"}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${shop.isOpen ? "bg-emerald-400 animate-pulse" : "bg-zinc-500"}`} />
+              <div className="font-bold truncate text-sm">{shop.name}</div>
+              <div className={`text-[10px] flex items-center gap-1.5 font-bold uppercase tracking-wider ${shop.isOpen ? "text-success" : "text-muted-foreground"}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${shop.isOpen ? "bg-success animate-pulse" : "bg-muted-foreground"}`} />
                 {shop.isOpen ? "Live" : "Offline"}
               </div>
             </div>
           </div>
         </div>
 
+        {/* Navigation items */}
         <nav className="flex-1 p-4 space-y-2 mt-4 overflow-y-auto">
           {[
             { id: "orders", label: "Live Orders", icon: ListOrdered, path: `/vendor/${slug}` },
@@ -290,8 +356,8 @@ export default function VendorAnalyticsPage() {
                 href={item.path}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
                   isActive
-                    ? "bg-zinc-100 text-black shadow-lg"
-                    : "text-zinc-400 hover:bg-zinc-800/60 hover:text-white"
+                    ? "bg-foreground text-background shadow-md"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}
               >
                 <item.icon className="w-4 h-4" /> {item.label}
@@ -300,11 +366,18 @@ export default function VendorAnalyticsPage() {
           })}
         </nav>
 
-        <div className="p-6 border-t border-zinc-800 mt-auto">
+        {/* SIDEBAR FOOTER: Theme toggle with top grid line divider & Sign Out */}
+        <div className="p-5 border-t border-border mt-auto space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+              <SunMoon className="w-4 h-4 text-primary" /> Theme
+            </span>
+            <ThemeToggle />
+          </div>
           <button
             onClick={signOut}
             disabled={isSigningOut}
-            className="flex items-center gap-2 text-xs text-zinc-400 hover:text-rose-400 transition-colors disabled:opacity-50 font-medium"
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 font-medium w-full px-1 pt-2 border-t border-border/60"
           >
             <Power className="w-3.5 h-3.5" /> {isSigningOut ? "Signing out..." : "Sign out"}
           </button>
@@ -312,21 +385,24 @@ export default function VendorAnalyticsPage() {
       </aside>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto bg-[#09090b]">
+      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto bg-background/50">
         {/* Mobile Navigation Header */}
-        <header className="lg:hidden bg-[#0c0c0e] border-b border-zinc-800 p-4 sticky top-0 z-20">
+        <header className="lg:hidden bg-card border-b border-border p-4 sticky top-0 z-20">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="text-xl">{shop.emoji}</div>
-              <span className="font-bold text-sm text-white truncate">{shop.name}</span>
+              <span className="font-bold text-sm truncate">{shop.name}</span>
             </div>
-            <button
-              onClick={signOut}
-              disabled={isSigningOut}
-              className="w-8 h-8 rounded-full bg-zinc-800 grid place-items-center text-zinc-400 hover:text-rose-400"
-            >
-              <Power className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <button
+                onClick={signOut}
+                disabled={isSigningOut}
+                className="w-8 h-8 rounded-full bg-secondary grid place-items-center text-muted-foreground hover:text-destructive"
+              >
+                <Power className="w-4 h-4" />
+              </button>
+            </div>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {[
@@ -340,8 +416,8 @@ export default function VendorAnalyticsPage() {
                 href={tab.path}
                 className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all ${
                   tab.id === "analytics"
-                    ? "bg-zinc-100 text-black border-zinc-100"
-                    : "bg-zinc-900 text-zinc-400 border-zinc-800"
+                    ? "bg-foreground text-background border-foreground"
+                    : "bg-secondary/60 text-muted-foreground border-transparent"
                 }`}
               >
                 {tab.label}
@@ -350,19 +426,24 @@ export default function VendorAnalyticsPage() {
           </div>
         </header>
 
-        <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto"
+        >
           {/* ── TOOLBAR / TOP ROW CONTROL BAR ── */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             {/* View Tabs Segmented Control */}
-            <div className="flex items-center p-1 bg-[#18181b] border border-zinc-800 rounded-full">
+            <div className="flex items-center p-1 bg-secondary/80 border border-border rounded-full shadow-inner">
               {(["overview", "sales", "expenses"] as ViewTab[]).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setViewTab(tab)}
                   className={`px-5 py-2 rounded-full text-sm font-semibold capitalize transition-all ${
                     viewTab === tab
-                      ? "bg-[#2d2d32] text-white shadow-md"
-                      : "text-zinc-400 hover:text-zinc-200"
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {tab}
@@ -376,31 +457,31 @@ export default function VendorAnalyticsPage() {
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="w-10 h-10 rounded-full bg-[#18181b] border border-zinc-800 grid place-items-center text-zinc-300 hover:text-white hover:border-zinc-700 transition-all"
+                className="w-10 h-10 rounded-full bg-card border border-border grid place-items-center text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all shadow-sm"
                 title="Refresh Analytics"
               >
-                <RotateCcw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-emerald-400" : ""}`} />
+                <RotateCcw className={`w-4 h-4 ${isRefreshing ? "animate-spin text-primary" : ""}`} />
               </button>
 
-              {/* Period Dropdown */}
+              {/* Period Dropdown (No calendar emoji in option text) */}
               <div className="relative">
                 <select
                   value={period}
                   onChange={(e) => setPeriod(e.target.value as Period)}
-                  className="appearance-none bg-[#18181b] border border-zinc-800 text-zinc-200 text-sm font-semibold rounded-full px-4 py-2.5 pr-9 hover:border-zinc-700 cursor-pointer focus:outline-none"
+                  className="appearance-none bg-card border border-border text-foreground text-sm font-semibold rounded-full px-4 py-2.5 pr-9 hover:border-foreground/30 cursor-pointer focus:outline-none shadow-sm"
                 >
-                  <option value="monthly">📅 Monthly</option>
-                  <option value="weekly">📅 Weekly</option>
-                  <option value="daily">📅 Daily</option>
-                  <option value="yearly">📅 Yearly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="daily">Daily</option>
+                  <option value="yearly">Yearly</option>
                 </select>
-                <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-4 h-4 text-muted-foreground absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
               {/* Download Button */}
               <button
                 onClick={downloadCSV}
-                className="flex items-center gap-2 bg-[#22c55e] hover:bg-[#16a34a] text-black font-bold text-sm px-5 py-2.5 rounded-full transition-all shadow-lg shadow-emerald-950/20 active:scale-95"
+                className="flex items-center gap-2 bg-success text-success-foreground font-bold text-sm px-5 py-2.5 rounded-full transition-all shadow-md hover:opacity-95 active:scale-95"
               >
                 <Download className="w-4 h-4" />
                 <span>Download</span>
@@ -408,115 +489,93 @@ export default function VendorAnalyticsPage() {
             </div>
           </div>
 
-          {/* ── KPI METRIC CARDS (4 CARDS - EXACT UI RECREATION) ── */}
+          {/* ── KPI METRIC CARDS (100% REAL COMPUTED METRICS) ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Card 1: Revenue */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-5 hover:border-zinc-700/80 transition-all shadow-sm">
-              <div className="text-zinc-400 text-sm font-medium">Revenue</div>
+            <motion.div whileHover={{ y: -2 }} className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+              <div className="text-muted-foreground text-sm font-medium">Revenue</div>
               <div className="flex items-center justify-between mt-3">
-                <div className="text-3xl font-bold text-white tracking-tight">
-                  ${analyticsData.revenue.toLocaleString()}
+                <div className="text-3xl font-extrabold tracking-tight">
+                  LKR {analyticsData.revenue.toLocaleString()}
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> 3.3%
+                <div className="flex items-center gap-1 text-xs font-bold text-success bg-success/10 border border-success/20 px-2.5 py-1 rounded-full">
+                  <ArrowUpRight className="w-3.5 h-3.5" /> Live
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 2: Expenses */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-5 hover:border-zinc-700/80 transition-all shadow-sm">
-              <div className="text-zinc-400 text-sm font-medium">Expenses</div>
+            <motion.div whileHover={{ y: -2 }} className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+              <div className="text-muted-foreground text-sm font-medium">Expenses</div>
               <div className="flex items-center justify-between mt-3">
-                <div className="text-3xl font-bold text-white tracking-tight">
-                  ${analyticsData.expenses.toLocaleString()}
+                <div className="text-3xl font-extrabold tracking-tight">
+                  LKR {analyticsData.expenses.toLocaleString()}
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1 rounded-full">
-                  <ArrowDownRight className="w-3.5 h-3.5" /> 3.3%
+                <div className="flex items-center gap-1 text-xs font-bold text-destructive bg-destructive/10 border border-destructive/20 px-2.5 py-1 rounded-full">
+                  <ArrowDownRight className="w-3.5 h-3.5" /> 12% est.
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 3: Sales */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-5 hover:border-zinc-700/80 transition-all shadow-sm">
-              <div className="text-zinc-400 text-sm font-medium">Sales</div>
+            <motion.div whileHover={{ y: -2 }} className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+              <div className="text-muted-foreground text-sm font-medium">Sales</div>
               <div className="flex items-center justify-between mt-3">
-                <div className="text-3xl font-bold text-white tracking-tight">
+                <div className="text-3xl font-extrabold tracking-tight">
                   {analyticsData.salesCount.toLocaleString()}
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> 3.3%
+                <div className="flex items-center gap-1 text-xs font-bold text-success bg-success/10 border border-success/20 px-2.5 py-1 rounded-full">
+                  <ArrowUpRight className="w-3.5 h-3.5" /> Orders
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 4: Profit */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-5 hover:border-zinc-700/80 transition-all shadow-sm">
-              <div className="text-zinc-400 text-sm font-medium">Profit</div>
+            <motion.div whileHover={{ y: -2 }} className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+              <div className="text-muted-foreground text-sm font-medium">Net Profit</div>
               <div className="flex items-center justify-between mt-3">
-                <div className="text-3xl font-bold text-white tracking-tight">
-                  ${analyticsData.profit.toLocaleString()}
+                <div className="text-3xl font-extrabold tracking-tight">
+                  LKR {analyticsData.profit.toLocaleString()}
                 </div>
-                <div className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> 4.1%
+                <div className="flex items-center gap-1 text-xs font-bold text-success bg-success/10 border border-success/20 px-2.5 py-1 rounded-full">
+                  <ArrowUpRight className="w-3.5 h-3.5" /> Net
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* ── MAIN CHARTS ROW (SALES PERFORMANCE & TRAFFIC SOURCE) ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Chart 1: Sales Performance */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-6 flex flex-col justify-between">
+            <div className="bg-card border border-border rounded-2xl p-6 flex flex-col justify-between shadow-sm">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-white tracking-tight">Sales Performance</h3>
-                  <select
-                    value={salesRange}
-                    onChange={(e) => setSalesRange(e.target.value as any)}
-                    className="bg-[#1e1e22] border border-zinc-800 text-zinc-300 text-xs font-medium rounded-xl px-3 py-1.5 focus:outline-none"
-                  >
-                    <option value="2weeks">Last 2 weeks</option>
-                    <option value="1month">Last 1 month</option>
-                    <option value="3months">Last 3 months</option>
-                  </select>
+                  <h3 className="text-lg font-bold tracking-tight">Sales Performance</h3>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-muted-foreground capitalize">
+                    {period} view
+                  </span>
                 </div>
 
-                {/* Sub-header metric values matching image */}
                 <div className="flex items-center gap-6 mb-6">
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xl font-extrabold text-white">
-                        ${analyticsData.weeklySalesAvg.toLocaleString()}
-                      </span>
-                      <span className="text-[11px] font-bold text-emerald-400 flex items-center">
-                        ↑ 3.3%
-                      </span>
+                    <div className="text-xl font-extrabold">
+                      LKR {analyticsData.weeklySalesAvg.toLocaleString()}
                     </div>
-                    <div className="text-xs text-zinc-400 mt-0.5">Weekly Sales</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Weekly Sales Avg</div>
                   </div>
 
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xl font-extrabold text-white">
-                        ${analyticsData.dailySalesAvg.toLocaleString()}
-                      </span>
-                      <span className="text-[11px] font-bold text-emerald-400 flex items-center">
-                        ↑ 3.3%
-                      </span>
+                    <div className="text-xl font-extrabold">
+                      LKR {analyticsData.dailySalesAvg.toLocaleString()}
                     </div>
-                    <div className="text-xs text-zinc-400 mt-0.5">Daily Sales</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Daily Sales Avg</div>
                   </div>
 
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xl font-extrabold text-white">
-                        {Math.round(analyticsData.salesCount * 0.6)}
-                      </span>
-                      <span className="text-[11px] font-bold text-emerald-400 flex items-center">
-                        ↑ 3.3%
-                      </span>
+                    <div className="text-xl font-extrabold">
+                      {analyticsData.salesCount}
                     </div>
-                    <div className="text-xs text-zinc-400 mt-0.5">Total Sales</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Total Orders</div>
                   </div>
                 </div>
               </div>
@@ -526,10 +585,19 @@ export default function VendorAnalyticsPage() {
                 {mounted && (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={analyticsData.salesPerformanceData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <XAxis dataKey="date" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} domain={[0, 60]} />
+                      <XAxis dataKey="date" stroke="currentColor" opacity={0.4} fontSize={11} tickLine={false} axisLine={false} />
+                      <YAxis stroke="currentColor" opacity={0.4} fontSize={11} tickLine={false} axisLine={false} />
                       <Tooltip
-                        contentStyle={{ backgroundColor: "#18181b", borderColor: "#27272a", borderRadius: "12px", color: "#fff", fontSize: "12px" }}
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          borderColor: "hsl(var(--border))",
+                          borderRadius: "12px",
+                          color: "hsl(var(--foreground))",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+                          padding: "8px 12px",
+                        }}
+                        itemStyle={{ color: "hsl(var(--foreground))", fontWeight: 700 }}
+                        labelStyle={{ color: "hsl(var(--muted-foreground))", fontWeight: 600 }}
                         formatter={(val: any) => [`${val} orders`, "Volume"]}
                       />
                       <Bar dataKey="sales" fill="#22c55e" radius={[6, 6, 6, 6]} barSize={18} />
@@ -539,46 +607,54 @@ export default function VendorAnalyticsPage() {
               </div>
             </div>
 
-            {/* Chart 2: Traffic Source */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-6 flex flex-col justify-between">
+            {/* Chart 2: Traffic & Order Channels */}
+            <div className="bg-card border border-border rounded-2xl p-6 flex flex-col justify-between shadow-sm">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-white tracking-tight">Traffic Source</h3>
+                  <h3 className="text-lg font-bold tracking-tight">Order Channels & Acquisition</h3>
                   <div className="flex items-center gap-4 text-xs font-medium">
-                    <span className="flex items-center gap-1.5 text-zinc-300">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" /> Organic
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#22c55e]" /> Organic ({analyticsData.takeawayOrders})
                     </span>
-                    <span className="flex items-center gap-1.5 text-zinc-300">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#4ade80]" /> Paid Ads
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#4ade80]" /> Direct ({analyticsData.dineInOrders})
                     </span>
-                    <button className="text-zinc-400 hover:text-white">
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <div className="text-2xl font-extrabold text-white tracking-tight">
-                    {analyticsData.totalSessions.toLocaleString()}
+                  <div className="text-2xl font-extrabold tracking-tight">
+                    {analyticsData.salesCount.toLocaleString()}
                   </div>
-                  <div className="text-xs text-zinc-400 mt-0.5">Sessions</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Total Orders Recorded</div>
                 </div>
               </div>
 
-              {/* Multi-line Area Chart Container */}
+              {/* Area Chart */}
               <div className="h-64 w-full mt-2">
                 {mounted && (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={analyticsData.trafficData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorOrganic" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                          <stop offset="5%" stopColor="#22c55e" stopOpacity={0.35} />
                           <stop offset="95%" stopColor="#22c55e" stopOpacity={0.0} />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="month" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val) => (val === 0 ? "0" : `${val / 1000}k`)} />
-                      <Tooltip contentStyle={{ backgroundColor: "#18181b", borderColor: "#27272a", borderRadius: "12px", color: "#fff", fontSize: "12px" }} />
+                      <XAxis dataKey="month" stroke="currentColor" opacity={0.4} fontSize={11} tickLine={false} axisLine={false} />
+                      <YAxis stroke="currentColor" opacity={0.4} fontSize={11} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          borderColor: "hsl(var(--border))",
+                          borderRadius: "12px",
+                          color: "hsl(var(--foreground))",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+                          padding: "8px 12px",
+                        }}
+                        itemStyle={{ color: "hsl(var(--foreground))", fontWeight: 700 }}
+                        labelStyle={{ color: "hsl(var(--muted-foreground))", fontWeight: 600 }}
+                      />
                       <Area type="monotone" dataKey="organic" stroke="#22c55e" strokeWidth={2.5} fillOpacity={1} fill="url(#colorOrganic)" />
                       <Area type="monotone" dataKey="paid" stroke="#4ade80" strokeWidth={2} fillOpacity={0} />
                     </AreaChart>
@@ -590,46 +666,46 @@ export default function VendorAnalyticsPage() {
 
           {/* ── DEEP ANALYTICS ROW (TOP SELLING ITEMS & CATEGORY BREAKDOWN) ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Top Selling Products (2 cols) */}
-            <div className="lg:col-span-2 bg-[#141416] border border-zinc-800/80 rounded-2xl p-6">
+            {/* Top Selling Products */}
+            <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-bold text-white tracking-tight">Top Performing Menu Items</h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">Best sellers by volume and revenue generated</p>
+                  <h3 className="text-lg font-bold tracking-tight">Top Performing Menu Items</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Calculated from actual completed vendor orders</p>
                 </div>
-                <div className="text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                  Live Rankings
+                <div className="text-xs font-semibold text-success bg-success/10 px-3 py-1 rounded-full border border-success/20">
+                  Real Sales Ranking
                 </div>
               </div>
 
-              <div className="divide-y divide-zinc-800/60 overflow-x-auto">
+              <div className="divide-y divide-border overflow-x-auto">
                 {analyticsData.topItems.map((item, idx) => (
                   <div key={item.id} className="py-3.5 flex items-center justify-between min-w-[480px]">
                     <div className="flex items-center gap-3">
-                      <span className="w-6 text-center font-bold text-sm text-zinc-500">#{idx + 1}</span>
-                      <div className="w-10 h-10 rounded-xl bg-zinc-800 grid place-items-center text-lg shrink-0">
-                        🍔
+                      <span className="w-6 text-center font-bold text-sm text-muted-foreground">#{idx + 1}</span>
+                      <div className="w-10 h-10 rounded-xl bg-secondary grid place-items-center text-lg shrink-0">
+                        🍽️
                       </div>
                       <div>
-                        <div className="font-bold text-sm text-white">{item.title}</div>
-                        <div className="text-xs text-zinc-400">{item.category}</div>
+                        <div className="font-bold text-sm">{item.title}</div>
+                        <div className="text-xs text-muted-foreground">{item.category}</div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-8">
                       <div className="text-right">
-                        <div className="text-sm font-bold text-white">{item.sales} sold</div>
-                        <div className="text-xs text-zinc-400">volume</div>
+                        <div className="text-sm font-bold">{item.sales} sold</div>
+                        <div className="text-xs text-muted-foreground">units</div>
                       </div>
 
-                      <div className="text-right w-24">
-                        <div className="text-sm font-bold text-white">LKR {item.revenue.toLocaleString()}</div>
-                        <div className="text-xs text-emerald-400 font-semibold">{item.growth}</div>
+                      <div className="text-right w-28">
+                        <div className="text-sm font-bold">LKR {item.revenue.toLocaleString()}</div>
+                        <div className="text-xs text-muted-foreground">revenue</div>
                       </div>
 
                       <div>
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${item.isAvailable ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
-                          {item.isAvailable ? "In Stock" : "Sold Out"}
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${item.isAvailable ? "bg-success/10 text-success border border-success/20" : "bg-destructive/10 text-destructive border border-destructive/20"}`}>
+                          {item.isAvailable ? "Available" : "Unavailable"}
                         </span>
                       </div>
                     </div>
@@ -638,11 +714,11 @@ export default function VendorAnalyticsPage() {
               </div>
             </div>
 
-            {/* Category Revenue Donut Chart (1 col) */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-6 flex flex-col justify-between">
+            {/* Category Share Donut Chart with CRISP CONTRAST TOOLTIP */}
+            <div className="bg-card border border-border rounded-2xl p-6 flex flex-col justify-between shadow-sm">
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">Category Share</h3>
-                <p className="text-xs text-zinc-400 mt-0.5">Revenue distribution across menu categories</p>
+                <h3 className="text-lg font-bold tracking-tight">Category Distribution</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Real revenue split across menu categories</p>
 
                 <div className="h-52 w-full my-4 relative grid place-items-center">
                   {mounted && (
@@ -659,42 +735,53 @@ export default function VendorAnalyticsPage() {
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
-                        <Tooltip contentStyle={{ backgroundColor: "#18181b", borderColor: "#27272a", borderRadius: "12px", color: "#fff" }} />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "hsl(var(--card))",
+                            borderColor: "hsl(var(--border))",
+                            borderRadius: "12px",
+                            color: "hsl(var(--foreground))",
+                            boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+                            padding: "8px 12px",
+                          }}
+                          itemStyle={{ color: "hsl(var(--foreground))", fontWeight: 700 }}
+                          labelStyle={{ color: "hsl(var(--muted-foreground))", fontWeight: 600 }}
+                          formatter={(val: any) => [`${val}%`, "Share"]}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   )}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <span className="text-2xl font-extrabold text-white">100%</span>
-                    <span className="text-[10px] uppercase font-bold text-zinc-400">Total Share</span>
+                    <span className="text-2xl font-extrabold">{analyticsData.salesCount}</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Total Orders</span>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-zinc-800">
+              <div className="space-y-2 pt-2 border-t border-border">
                 {analyticsData.categoryData.map((cat) => (
                   <div key={cat.name} className="flex items-center justify-between text-xs font-semibold">
-                    <span className="flex items-center gap-2 text-zinc-300">
+                    <span className="flex items-center gap-2 text-muted-foreground">
                       <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
                       {cat.name}
                     </span>
-                    <span className="text-white font-bold">{cat.value}%</span>
+                    <span className="font-bold">{cat.value}%</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* ── PEAK RUSH HOURS & FULFILLMENT EFFICIENCY ── */}
+          {/* ── PEAK RUSH HOURS ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Peak Rush Hours Distribution */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-6">
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-bold text-white tracking-tight">Peak Order Rush Hours</h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">Busiest customer order times throughout the day</p>
+                  <h3 className="text-lg font-bold tracking-tight">Peak Order Rush Hours</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Order frequency by time of day</p>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full">
-                  <Clock className="w-3.5 h-3.5" /> Lunch & Dinner Peaks
+                <div className="flex items-center gap-1 text-xs text-success font-bold bg-success/10 px-3 py-1 rounded-full">
+                  <Clock className="w-3.5 h-3.5" /> Time Analytics
                 </div>
               </div>
 
@@ -702,9 +789,20 @@ export default function VendorAnalyticsPage() {
                 {mounted && (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={analyticsData.hourlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <XAxis dataKey="hour" stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#71717a" fontSize={11} tickLine={false} axisLine={false} />
-                      <Tooltip contentStyle={{ backgroundColor: "#18181b", borderColor: "#27272a", borderRadius: "12px", color: "#fff" }} />
+                      <XAxis dataKey="hour" stroke="currentColor" opacity={0.4} fontSize={11} tickLine={false} axisLine={false} />
+                      <YAxis stroke="currentColor" opacity={0.4} fontSize={11} tickLine={false} axisLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          borderColor: "hsl(var(--border))",
+                          borderRadius: "12px",
+                          color: "hsl(var(--foreground))",
+                          boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
+                          padding: "8px 12px",
+                        }}
+                        itemStyle={{ color: "hsl(var(--foreground))", fontWeight: 700 }}
+                        labelStyle={{ color: "hsl(var(--muted-foreground))", fontWeight: 600 }}
+                      />
                       <Bar dataKey="orders" fill="#4ade80" radius={[6, 6, 0, 0]} barSize={24} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -712,45 +810,41 @@ export default function VendorAnalyticsPage() {
               </div>
             </div>
 
-            {/* Order Fulfillment & Kitchen Metrics */}
-            <div className="bg-[#141416] border border-zinc-800/80 rounded-2xl p-6 flex flex-col justify-between">
+            {/* Performance Summary */}
+            <div className="bg-card border border-border rounded-2xl p-6 flex flex-col justify-between shadow-sm">
               <div>
-                <h3 className="text-lg font-bold text-white tracking-tight">Fulfillment Performance</h3>
-                <p className="text-xs text-zinc-400 mt-0.5">Speed, accuracy & customer ratings</p>
+                <h3 className="text-lg font-bold tracking-tight">Store Metrics Summary</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">Real order velocity metrics</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 my-4">
-                <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800">
-                  <div className="text-xs text-zinc-400 font-medium">Avg Prep Time</div>
-                  <div className="text-2xl font-extrabold text-white mt-1">8.4 mins</div>
-                  <div className="text-[11px] font-semibold text-emerald-400 mt-1">⚡ 1.2m faster than avg</div>
+                <div className="p-4 rounded-xl bg-secondary/60 border border-border">
+                  <div className="text-xs text-muted-foreground font-medium">Recorded Revenue</div>
+                  <div className="text-2xl font-extrabold mt-1">LKR {analyticsData.revenue.toLocaleString()}</div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800">
-                  <div className="text-xs text-zinc-400 font-medium">On-Time Dispatch</div>
-                  <div className="text-2xl font-extrabold text-white mt-1">97.8%</div>
-                  <div className="text-[11px] font-semibold text-emerald-400 mt-1">✓ Top Tier Vendor</div>
+                <div className="p-4 rounded-xl bg-secondary/60 border border-border">
+                  <div className="text-xs text-muted-foreground font-medium">Order Count</div>
+                  <div className="text-2xl font-extrabold mt-1">{analyticsData.salesCount}</div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800">
-                  <div className="text-xs text-zinc-400 font-medium">Cancellation Rate</div>
-                  <div className="text-2xl font-extrabold text-white mt-1">0.8%</div>
-                  <div className="text-[11px] font-semibold text-emerald-400 mt-1">↓ Extremely Low</div>
+                <div className="p-4 rounded-xl bg-secondary/60 border border-border">
+                  <div className="text-xs text-muted-foreground font-medium">Active Menu Items</div>
+                  <div className="text-2xl font-extrabold mt-1">{menuItems.length}</div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800">
-                  <div className="text-xs text-zinc-400 font-medium">Customer Rating</div>
-                  <div className="text-2xl font-extrabold text-white mt-1">4.9 ★</div>
-                  <div className="text-[11px] font-semibold text-emerald-400 mt-1">Based on 340+ reviews</div>
+                <div className="p-4 rounded-xl bg-secondary/60 border border-border">
+                  <div className="text-xs text-muted-foreground font-medium">Takeaway / Delivery</div>
+                  <div className="text-2xl font-extrabold mt-1">{analyticsData.takeawayOrders}</div>
                 </div>
               </div>
 
-              <div className="text-xs text-zinc-400 text-center border-t border-zinc-800/80 pt-3">
-                Calculated automatically from completed vendor orders
+              <div className="text-xs text-muted-foreground text-center border-t border-border pt-3">
+                Updated in real-time from vendor orders database
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </main>
     </div>
   );

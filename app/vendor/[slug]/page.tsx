@@ -2,14 +2,14 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   ListOrdered, Utensils, BarChart3, Settings,
   Check, ChefHat, Bell, TrendingUp, DollarSign,
   Plus, Pencil, Power, Users, Trash2,
   ArrowLeft, ToggleLeft, ToggleRight, Upload,
   Search, X, RotateCcw, Printer, ChevronRight,
-  Clock, MapPin, Hash, User
+  Clock, MapPin, Hash, User, SunMoon
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -39,6 +39,7 @@ type Tab = "orders" | "menu" | "analytics" | "settings";
 
 export default function VendorDashboard() {
   const params = useParams();
+  const router = useRouter();
   const slug = params?.slug as string;
   const { data: user, isLoading: userLoading } = useSupabaseUser();
   const { data: shop, isLoading: shopLoading } = useVendorShop(slug, user?.id);
@@ -385,11 +386,18 @@ export default function VendorDashboard() {
           {[
             { id: "orders", label: "Live Orders", icon: ListOrdered },
             { id: "menu", label: "Menu Items", icon: Utensils },
+            { id: "analytics", label: "Analytics", icon: BarChart3 },
             { id: "settings", label: "Store Settings", icon: Settings },
           ].map((t) => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id as Tab)}
+              onClick={() => {
+                if (t.id === "analytics") {
+                  router.push(`/vendor/${slug}/analytics`);
+                } else {
+                  setTab(t.id as Tab);
+                }
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
                 tab === t.id
                   ? "bg-foreground text-background"
@@ -400,8 +408,18 @@ export default function VendorDashboard() {
             </button>
           ))}
         </nav>
-        <div className="p-6 border-t border-border mt-auto">
-          <button onClick={signOut} disabled={isSigningOut} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 font-medium">
+        <div className="p-5 border-t border-border mt-auto space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-bold text-muted-foreground flex items-center gap-2">
+              <SunMoon className="w-4 h-4 text-primary" /> Theme
+            </span>
+            <ThemeToggle />
+          </div>
+          <button
+            onClick={signOut}
+            disabled={isSigningOut}
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 font-medium w-full px-1 pt-2 border-t border-border/60"
+          >
             <Power className="w-3.5 h-3.5" /> {isSigningOut ? "Signing out..." : "Sign out"}
           </button>
         </div>
@@ -432,10 +450,16 @@ export default function VendorDashboard() {
             </div>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {["orders", "menu", "settings"].map((t) => (
+            {["orders", "menu", "analytics", "settings"].map((t) => (
               <button
                 key={t}
-                onClick={() => setTab(t as Tab)}
+                onClick={() => {
+                  if (t === "analytics") {
+                    router.push(`/vendor/${slug}/analytics`);
+                  } else {
+                    setTab(t as Tab);
+                  }
+                }}
                 className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap border capitalize transition-all ${
                   tab === t 
                     ? "bg-foreground text-background border-foreground" 
@@ -585,16 +609,13 @@ export default function VendorDashboard() {
                     </div>
                     <ReceiptPreview order={selectedOrder} />
                     <div className="mt-8 flex gap-3">
-                       <Button variant="outline" className="flex-1 pill h-11 text-sm" onClick={() => window.print()}>
-                         <Printer className="w-4 h-4 mr-2" /> Print Ticket
-                       </Button>
                        {selectedOrder.status === "ready" ? (
-                         <Button className="flex-1 pill h-11 text-sm bg-success hover:bg-success/90 text-white font-bold" onClick={() => handleUpdateStatus(selectedOrder.id, "completed")}>
-                           <Check className="w-4 h-4 mr-2" /> Complete
+                         <Button className="w-full pill h-11 text-sm bg-success hover:bg-success/90 text-white font-bold" onClick={() => handleUpdateStatus(selectedOrder.id, "completed")}>
+                           <Check className="w-4 h-4 mr-2" /> Complete Order
                          </Button>
                        ) : (
-                         <Button className="flex-1 pill h-11 text-sm bg-foreground text-background font-bold" onClick={() => handleUpdateStatus(selectedOrder.id, "ready")}>
-                           <Bell className="w-4 h-4 mr-2" /> Make Ready
+                         <Button className="w-full pill h-11 text-sm bg-foreground text-background font-bold" onClick={() => handleUpdateStatus(selectedOrder.id, "ready")}>
+                           <Bell className="w-4 h-4 mr-2" /> Mark as Ready
                          </Button>
                        )}
                     </div>
@@ -908,17 +929,6 @@ export default function VendorDashboard() {
                       className="rounded-2xl"
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Theme Settings */}
-              <div className="rounded-3xl border border-border bg-card p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h3 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Appearance</h3>
-                    <p className="text-xs text-muted-foreground">Switch between light and dark theme modes</p>
-                  </div>
-                  <ThemeToggle />
                 </div>
               </div>
             </div>

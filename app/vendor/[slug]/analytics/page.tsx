@@ -42,7 +42,6 @@ import {
 import { useSignOut } from "@/lib/supabase/useSignOut";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
-type ViewTab = "overview" | "sales" | "expenses";
 type Period = "monthly" | "weekly" | "daily" | "yearly";
 
 export default function VendorAnalyticsPage() {
@@ -54,7 +53,6 @@ export default function VendorAnalyticsPage() {
   const { data: menuItems = [] } = useShopMenuItems(shop?.id);
   const { signOut, isSigningOut } = useSignOut("/vendor/login");
 
-  const [viewTab, setViewTab] = useState<ViewTab>("overview");
   const [period, setPeriod] = useState<Period>("monthly");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -434,21 +432,9 @@ export default function VendorAnalyticsPage() {
         >
           {/* ── TOOLBAR / TOP ROW CONTROL BAR ── */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            {/* View Tabs Segmented Control */}
-            <div className="flex items-center p-1 bg-secondary/80 border border-border rounded-full shadow-inner">
-              {(["overview", "sales", "expenses"] as ViewTab[]).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setViewTab(tab)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold capitalize transition-all ${
-                    viewTab === tab
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">Analytics Dashboard</h1>
+              <p className="text-xs text-muted-foreground">Real-time performance and financial insights</p>
             </div>
 
             {/* Right Action Controls */}

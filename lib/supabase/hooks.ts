@@ -221,26 +221,27 @@ export function useLiveOrder(code: string) {
     queryKey: ["order", code],
     queryFn: () => fetchOrderByCode(code),
     enabled: Boolean(code),
-    refetchInterval: 15000, // Backup polling for mobile sleep/wake
+    refetchInterval: 3000,
   });
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
     if (!supabase || !code) return;
 
-    const padded = /^\d+$/.test(code.trim()) ? code.trim().padStart(4, "0") : code.trim();
-
     const channel = supabase
-      .channel(`order:${padded}`)
+      .channel(`order-live-${code}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "orders",
-          filter: `daily_code=eq.${padded}`,
         },
-        () => queryClient.invalidateQueries({ queryKey: ["order", code] })
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["order", code] });
+          queryClient.invalidateQueries({ queryKey: ["user-orders"] });
+          queryClient.invalidateQueries({ queryKey: ["vendor-orders"] });
+        }
       )
       .subscribe();
 

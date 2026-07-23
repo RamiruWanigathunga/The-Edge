@@ -158,16 +158,8 @@ export default function HomePage() {
       {/* ── FAVOURITES (Conditional) ── */}
       {hasFavorites && (
         <section className="container mx-auto px-4 py-8">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your favourites</h2>
-            </div>
-            <Link
-              href="/favorites"
-              className="pill bg-secondary text-muted-foreground text-xs font-medium px-4 py-1.5 hover:bg-secondary/80 transition-smooth focus-dashed"
-            >
-              View all
-            </Link>
+          <div className="mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your favourites</h2>
           </div>
           <div className="flex gap-4 overflow-x-auto snap-x scrollbar-hide -mx-4 pt-2 pb-8 scroll-pl-4 scroll-pr-4">
             {favouriteItems.map((item, index) => (

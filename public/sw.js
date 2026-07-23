@@ -1,10 +1,24 @@
-const CACHE_NAME = "the-edge-shell-v3";
+const CACHE_NAME = "the-edge-shell-v4";
 const SHELL_ASSETS = [
   "/",
   "/manifest.json",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
 ];
+
+// Only same-origin static build assets are cacheable. Dynamic/API data (Supabase REST
+// calls, auth, anything account-specific) must never be cached here — a previous version
+// of this file cached every successful GET indiscriminately, which meant stale responses
+// were served forever (toggling a favorite never "took" on next read) and, for any query
+// that relies on RLS rather than a user-id filter in the URL, one account's cached response
+// could be served to a different logged-in account on the same device.
+function isCacheableStaticAsset(url) {
+  if (url.origin !== self.location.origin) return false;
+  if (url.pathname.startsWith("/_next/static/")) return true;
+  if (url.pathname.startsWith("/icons/") || url.pathname.startsWith("/images/")) return true;
+  if (url.pathname === "/manifest.json") return true;
+  return false;
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -31,6 +45,8 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return;
 
+  const url = new URL(request.url);
+
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
@@ -41,6 +57,11 @@ self.addEventListener("fetch", (event) => {
         })
         .catch(() => caches.match("/"))
     );
+    return;
+  }
+
+  if (!isCacheableStaticAsset(url)) {
+    // Dynamic/API data — always go straight to the network, never cache or intercept.
     return;
   }
 

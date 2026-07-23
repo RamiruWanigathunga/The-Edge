@@ -1,16 +1,14 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import {
-  Bell, LogOut, ChevronRight, Moon, Sun, Pencil, CreditCard, Heart,
+  Bell, LogOut, ChevronRight, Moon, Sun, Pencil, CreditCard,
   HelpCircle, Check,
-  Store, ArrowRight
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { QuickThemeToggle } from "@/components/ui/QuickThemeToggle";
 import { ProfileAvatar } from "@/components/ui/ProfileAvatar";
-import { useSupabaseUser, useProfile, useUserOrders, useMyApprovedShops } from "@/lib/supabase/hooks";
+import { useSupabaseUser, useProfile, useUserOrders } from "@/lib/supabase/hooks";
 import { updateProfile } from "@/lib/supabase/data";
 import { useSignOut } from "@/lib/supabase/useSignOut";
 import { DeleteAccountButton } from "@/components/auth/DeleteAccountButton";
@@ -24,7 +22,6 @@ export default function ProfilePage() {
   const { data: user } = useSupabaseUser();
   const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useProfile(user?.id);
   const { data: orders = [] } = useUserOrders(user?.id);
-  const { data: shops = [] } = useMyApprovedShops(user?.id);
   const { signOut, isSigningOut } = useSignOut("/auth");
   
   const [tempName, setTempName] = React.useState("");
@@ -145,56 +142,27 @@ export default function ProfilePage() {
                     <div className="text-[9px] uppercase tracking-widest font-bold text-muted-foreground">Active</div>
                   </div>
                 </div>
-
-                <Link
-                  href="/favorites"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 text-sm bg-foreground text-background dark:bg-white dark:text-black rounded-2xl font-bold hover:opacity-90 transition-opacity"
-                >
-                  <Heart className="w-4 h-4 fill-current" />
-                  View Favorites
-                </Link>
               </div>
             </div>
           </aside>
 
           {/* ── RIGHT COLUMN (Settings) ── */}
           <div className="flex-1 space-y-8">
-            {shops.length > 0 && (
-              <section>
-                <h3 className="label-mono mb-4 ml-2">Vendor Partner Account</h3>
-                <Link
-                  href="/vendor"
-                  className="bg-white dark:bg-card border border-primary/20 rounded-3xl overflow-hidden p-5 flex items-center justify-between hover:bg-primary/5 transition-all group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
-                      <Store className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-[16px]">Vendor Dashboard</div>
-                      <div className="text-[12px] text-muted-foreground font-medium">Switch to kitchen portal & manage orders</div>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </section>
-            )}
-
             <section>
               <h3 className="label-mono mb-4 ml-2">Appearance</h3>
-              <div className="bg-white dark:bg-card shadow-soft rounded-3xl overflow-hidden p-5 flex items-center justify-between">
+              <div className="hidden md:flex bg-white dark:bg-card shadow-soft rounded-3xl overflow-hidden p-5 items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-secondary/80 flex items-center justify-center">
                     <Moon className="w-6 h-6 text-muted-foreground" />
                   </div>
                   <div>
                     <div className="font-bold text-[16px]">Dark Mode</div>
-                  
+
                   </div>
                 </div>
                 <ThemeToggle />
               </div>
-              <div className="md:hidden mt-3 bg-white dark:bg-card shadow-soft rounded-3xl overflow-hidden p-5 flex items-center justify-between">
+              <div className="md:hidden bg-white dark:bg-card shadow-soft rounded-3xl overflow-hidden p-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-secondary/80 flex items-center justify-center">
                     <Sun className="w-6 h-6 text-muted-foreground" />

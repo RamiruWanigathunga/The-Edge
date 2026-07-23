@@ -13,6 +13,7 @@ type CartState = {
   items: CartEntry[];
   recentlyViewed: string[];
   isDrawerOpen: boolean;
+  isBottomSheetOpen: boolean;
 
   // Cart Actions
   add: (
@@ -36,6 +37,9 @@ type CartState = {
   closeDrawer: () => void;
   toggleDrawer: () => void;
 
+  // Any mobile bottom sheet (e.g. Add to Cart modal) — lets BottomNav hide itself while open
+  setBottomSheetOpen: (open: boolean) => void;
+
   // Selectors
   count: () => number;
   total: () => number;
@@ -47,6 +51,7 @@ export const useCart = create<CartState>()(
     items: [],
     recentlyViewed: [],
     isDrawerOpen: false,
+    isBottomSheetOpen: false,
 
     add: (item, qty = 1, opts) => {
       const state = get();
@@ -135,6 +140,8 @@ export const useCart = create<CartState>()(
     openDrawer: () => set({ isDrawerOpen: true }),
     closeDrawer: () => set({ isDrawerOpen: false }),
     toggleDrawer: () => set((s) => ({ isDrawerOpen: !s.isDrawerOpen })),
+
+    setBottomSheetOpen: (open) => set({ isBottomSheetOpen: open }),
 
     count: () => get().items.reduce((n, c) => n + c.qty, 0),
 

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Minus, Plus } from "lucide-react";
 import { MenuItem } from "@/lib/types";
+import { useCart } from "@/store/cart";
 
 type DiningType = "dine-in" | "takeaway";
 
@@ -29,6 +30,7 @@ export function AddToCartModal({
   const [qty, setQty] = React.useState(1);
   const [notes, setNotes] = React.useState("");
   const [dining, setDining] = React.useState<DiningType>("takeaway");
+  const setBottomSheetOpen = useCart((s) => s.setBottomSheetOpen);
 
   React.useEffect(() => {
     if (open) {
@@ -37,6 +39,10 @@ export function AddToCartModal({
       setDining("takeaway");
     }
   }, [open]);
+
+  React.useEffect(() => {
+    setBottomSheetOpen(open);
+  }, [open, setBottomSheetOpen]);
 
   const maxQty = item.maxPerOrder ?? Infinity;
 
@@ -61,13 +67,13 @@ export function AddToCartModal({
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: "spring", damping: 32, stiffness: 320 }}
-            className="fixed inset-x-0 bottom-0 sm:inset-0 sm:m-auto z-50 w-full sm:max-w-3xl sm:h-fit sm:max-h-[85vh] max-h-[65vh] bg-card rounded-t-[2rem] sm:rounded-[2rem] shadow-elevated overflow-hidden flex flex-col"
+            className="fixed inset-x-0 bottom-0 sm:inset-0 sm:m-auto z-50 w-full sm:max-w-3xl sm:h-fit sm:max-h-[85vh] max-h-[65vh] bg-background text-foreground rounded-t-[2rem] sm:rounded-[2rem] shadow-elevated overflow-hidden flex flex-col"
           >
-            <div className="flex items-center justify-end sm:justify-start px-5 pt-5 sm:px-8 sm:pt-8 shrink-0">
+            <div className="flex items-center justify-end px-5 pt-5 sm:px-8 sm:pt-8 shrink-0">
               <button
                 onClick={onClose}
                 aria-label="Close"
-                className="w-9 h-9 rounded-full grid place-items-center bg-secondary/80 sm:bg-transparent hover:bg-secondary transition-colors focus-dashed"
+                className="w-9 h-9 rounded-full grid place-items-center bg-secondary hover:bg-secondary/70 transition-colors focus-dashed"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -75,7 +81,7 @@ export function AddToCartModal({
 
             <div className="flex-1 overflow-y-auto px-6 pb-6 sm:px-8 sm:pb-8">
               <div className="sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] sm:gap-12">
-                <div className="hidden sm:block relative sm:w-full aspect-square rounded-2xl overflow-hidden bg-muted">
+                <div className="hidden sm:block relative sm:w-full aspect-square rounded-2xl overflow-hidden bg-secondary">
                   <Image
                     src={item.image}
                     alt={item.title}
@@ -158,7 +164,7 @@ export function AddToCartModal({
                   <div className="border-t border-border pt-5">
                     <div className="flex items-center justify-between">
                       <h3 className="text-base font-bold">Quantity</h3>
-                      <div className="inline-flex items-center rounded-full bg-secondary shadow-soft overflow-hidden">
+                      <div className="inline-flex items-center rounded-full bg-secondary overflow-hidden">
                         <button
                           type="button"
                           onClick={() => setQty((q) => Math.max(1, q - 1))}
@@ -188,7 +194,7 @@ export function AddToCartModal({
 
             <div
               className="shrink-0 border-t border-border p-4"
-              style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+              style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 28px)" }}
             >
               <button
                 onClick={() => onConfirm(qty, { notes: notes.trim() || undefined, dining })}

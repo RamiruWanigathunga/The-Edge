@@ -75,6 +75,7 @@ export default function VendorDashboard() {
     estimatedPrepTime: "10",
     badge: "",
     isPopular: false,
+    searchKeywords: "",
   });
 
   // Settings State
@@ -223,6 +224,7 @@ export default function VendorDashboard() {
         estimatedPrepTime: item.estimatedPrepTime ? parseInt(item.estimatedPrepTime, 10).toString() : "10",
         badge: item.badge || "",
         isPopular: item.popular ?? false,
+        searchKeywords: item.searchKeywords ? item.searchKeywords.join(", ") : "",
       });
     } else {
       setEditingItemId(null);
@@ -238,6 +240,7 @@ export default function VendorDashboard() {
         estimatedPrepTime: "10",
         badge: "",
         isPopular: false,
+        searchKeywords: "",
       });
     }
     setIsItemModalOpen(true);
@@ -256,6 +259,9 @@ export default function VendorDashboard() {
     const discountNum = itemForm.discountPrice ? parseInt(itemForm.discountPrice, 10) : null;
     const maxOrderNum = itemForm.maxPerOrder ? parseInt(itemForm.maxPerOrder, 10) : null;
     const prepTimeNum = itemForm.estimatedPrepTime ? parseInt(itemForm.estimatedPrepTime, 10) : 10;
+    const keywordsArray = itemForm.searchKeywords
+      ? itemForm.searchKeywords.split(",").map((k) => k.trim()).filter(Boolean)
+      : [];
 
     try {
       if (editingItemId) {
@@ -273,6 +279,7 @@ export default function VendorDashboard() {
             estimated_prep_time_minutes: prepTimeNum,
             badge: itemForm.badge || null,
             is_popular: itemForm.isPopular,
+            search_keywords: keywordsArray,
           },
         });
         toast.success("Menu item updated");
@@ -290,6 +297,7 @@ export default function VendorDashboard() {
           estimatedPrepTimeMinutes: prepTimeNum,
           badge: itemForm.badge || null,
           isPopular: itemForm.isPopular,
+          searchKeywords: keywordsArray,
         });
         toast.success("Menu item created");
       }
@@ -991,6 +999,17 @@ export default function VendorDashboard() {
                       className="rounded-2xl"
                     />
                   </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Search Keywords (comma separated)</label>
+                  <Input
+                    value={itemForm.searchKeywords}
+                    onChange={(e) => setItemForm({ ...itemForm, searchKeywords: e.target.value })}
+                    placeholder="e.g. Koththu, Kottu, Roti, Chicken Kottu"
+                    className="rounded-2xl"
+                  />
+                  <p className="text-[11px] text-muted-foreground">Add alternative names or spellings so customers can easily find this item in search.</p>
                 </div>
 
 

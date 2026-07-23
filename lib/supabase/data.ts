@@ -656,6 +656,7 @@ export async function createMenuItem(item: {
   estimatedPrepTimeMinutes?: number;
   badge?: string | null;
   isPopular?: boolean;
+  searchKeywords?: string[];
 }) {
   const supabase = getSupabaseBrowserClient();
   if (!supabase) return;
@@ -674,6 +675,7 @@ export async function createMenuItem(item: {
     estimated_prep_time_minutes: item.estimatedPrepTimeMinutes ?? 10,
     badge: item.badge ?? null,
     is_popular: item.isPopular ?? false,
+    search_keywords: item.searchKeywords ?? [],
   });
 
   if (error) throw error;
@@ -694,6 +696,7 @@ export async function updateMenuItem(
     estimated_prep_time_minutes: number;
     badge: string | null;
     is_popular: boolean;
+    search_keywords: string[];
   }>
 ) {
   const supabase = getSupabaseBrowserClient();

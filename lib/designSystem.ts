@@ -94,7 +94,6 @@ export const breakpoints = {
 export const dietaryFilters = [
   "Vegetarian",
   "Vegan",
-  "Non-Vegetarian",
   "Gluten-Free",
   "Halal",
   "Breakfast",
@@ -102,9 +101,6 @@ export const dietaryFilters = [
   "Dinner",
   "Snacks",
   "Desserts",
-  "Spicy",
-  "Mild",
-  "Healthy",
 ] as const;
 export type DietaryTag = typeof dietaryFilters[number];
 

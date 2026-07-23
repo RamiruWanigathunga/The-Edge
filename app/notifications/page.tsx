@@ -4,13 +4,10 @@ import Link from "next/link";
 import { Clock, ArrowRight, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSupabaseUser, useUserOrders } from "@/lib/supabase/hooks";
+import { startOfDay } from "@/lib/utils";
 import type { OrderStatus } from "@/lib/types";
 
 const notifyingStatuses = new Set<OrderStatus>(["paid", "preparing", "ready", "customer_late"]);
-
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
 
 function getDateLabel(value: string) {
   const date = new Date(value);

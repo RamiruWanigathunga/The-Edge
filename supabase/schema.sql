@@ -475,20 +475,22 @@ create policy "Public can read app settings" on public.app_settings
   for select to anon, authenticated
   using (true);
 
--- Shops: anyone can read approved shops, approved owners can update safe shop fields
-create policy "Public can read approved shops" on public.shops
+-- Shops: anyone can read approved shops, or your own row (pending or approved) —
+-- the old "approved owner" read policy was a strict subset of "own row" so it's folded in.
+-- Approved owners can update safe shop fields.
+create policy "Read shops (public approved + own)" on public.shops
   for select to anon, authenticated
-  using (is_approved = true and status = 'approved');
-create policy "Approved owners can read own shops" on public.shops
-  for select to authenticated
-  using (auth.uid() = owner_id and is_approved = true and status = 'approved');
+  using (
+    (is_approved = true and status = 'approved')
+    or auth.uid() = owner_id
+  );
 create policy "Approved owners can update own shops" on public.shops
   for update to authenticated
   using (auth.uid() = owner_id and is_approved = true and status = 'approved')
   with check (auth.uid() = owner_id and is_approved = true and status = 'approved');
 
--- Shops: applicants can submit their own pending application (while registration is open),
--- and can read their own row regardless of approval status to check on it
+-- Shops: applicants can submit their own pending application (while registration is open).
+-- (Reading their own application is covered by "Read shops (public approved + own)" above.)
 create policy "Applicants can submit own pending shop" on public.shops
   for insert to authenticated
   with check (
@@ -501,31 +503,22 @@ create policy "Applicants can submit own pending shop" on public.shops
         and value = 'true'::jsonb
     )
   );
-create policy "Applicants can read own shop application" on public.shops
-  for select to authenticated
-  using (auth.uid() = owner_id);
 
--- Menu Items: public only sees available items from approved shops; approved owners manage their menus
-create policy "Public can read available menu items from approved shops" on public.menu_items
+-- Menu Items: public sees available items from approved shops; owners also see their own
+-- items regardless of availability — merged into one policy since an owner match already
+-- implies the shop is theirs.
+create policy "Read menu items (public available + own shop)" on public.menu_items
   for select to anon, authenticated
   using (
-    is_available = true
-    and exists (
+    (is_available = true and exists (
+      select 1 from public.shops
+      where id = menu_items.shop_id and is_approved = true and status = 'approved'
+    ))
+    or exists (
       select 1 from public.shops
       where id = menu_items.shop_id
-        and is_approved = true
-        and status = 'approved'
-    )
-  );
-create policy "Approved owners can read own menu items" on public.menu_items
-  for select to authenticated
-  using (
-    exists (
-      select 1 from public.shops
-      where id = menu_items.shop_id
-        and owner_id = auth.uid()
-        and is_approved = true
-        and status = 'approved'
+        and owner_id = (select auth.uid())
+        and is_approved = true and status = 'approved'
     )
   );
 create policy "Approved owners can insert own menu items" on public.menu_items
@@ -571,17 +564,15 @@ create policy "Approved owners can delete own menu items" on public.menu_items
     )
   );
 
--- Orders: Users can read own, vendors can read their shop's orders
-create policy "Users can read own orders" on public.orders
-  for select to authenticated
-  using (auth.uid() = user_id);
-create policy "Vendors can read approved shop orders" on public.orders
+-- Orders: users read their own orders, vendors read their shop's orders — merged into one policy.
+create policy "Read orders (own order + own shop)" on public.orders
   for select to authenticated
   using (
-    exists (
+    (select auth.uid()) = user_id
+    or exists (
       select 1 from public.shops
       where id = orders.shop_id
-        and owner_id = auth.uid()
+        and owner_id = (select auth.uid())
         and is_approved = true
         and status = 'approved'
     )
@@ -619,23 +610,19 @@ create policy "Vendors can delete approved shop orders" on public.orders
     )
   );
 
--- Order Items
-create policy "Users can read own order items" on public.order_items
+-- Order Items: customer reads own order's items, vendor reads own shop's — merged into one policy.
+create policy "Read order items (own order + own shop)" on public.order_items
   for select to authenticated
   using (
     exists (
       select 1 from public.orders
       where id = order_items.order_id
-        and user_id = auth.uid()
+        and user_id = (select auth.uid())
     )
-  );
-create policy "Vendors can read approved shop order items" on public.order_items
-  for select to authenticated
-  using (
-    exists (
+    or exists (
       select 1 from public.shops
       where id = order_items.shop_id
-        and owner_id = auth.uid()
+        and owner_id = (select auth.uid())
         and is_approved = true
         and status = 'approved'
     )

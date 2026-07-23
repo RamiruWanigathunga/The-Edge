@@ -38,7 +38,6 @@
 
   --shadow-soft: var(--edge-shadow-soft);
   --shadow-elevated: var(--edge-shadow-elevated);
-  --shadow-pop: var(--edge-shadow-pop);
 
   --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   --animate-fade-in: fade-in 0.3s ease-out forwards;
@@ -88,15 +87,11 @@
     --radius: 1rem;
 
     --gradient-hero: linear-gradient(135deg, hsl(134 81% 65%) 0%, hsl(142 76% 80%) 45%, hsl(137 100% 92%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(137 100% 87%) 0%, hsl(134 81% 65%) 100%);
 
     --edge-shadow-soft: 0 1px 2px hsl(220 13% 10% / 0.04), 0 2px 10px hsl(220 13% 10% / 0.06);
     --edge-shadow-elevated: 0 2px 4px hsl(220 13% 10% / 0.05), 0 8px 24px hsl(220 13% 10% / 0.08);
-    --edge-shadow-pop: none;
 
     --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
-    --glass-bg: hsl(var(--background));
-    --glass-border: hsl(var(--border));
   }
 
   .dark {
@@ -121,8 +116,6 @@
     --ring: 134 81% 65%;
     --edge-shadow-soft: none;
     --edge-shadow-elevated: 0 8px 28px hsl(0 0% 0% / 0.45);
-    --glass-bg: hsl(var(--background));
-    --glass-border: hsl(var(--border));
   }
 
   * {
@@ -201,22 +194,8 @@
     @apply font-medium uppercase text-xs tracking-widest text-muted-foreground;
   }
 
-  .glass-light {
-    background: hsl(var(--background));
-    border: 1px solid hsl(var(--border));
-  }
-
-  .glass-dark {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-  }
-
   .hero-gradient {
     background: var(--gradient-hero);
-  }
-
-  .success-gradient {
-    background: var(--gradient-success);
   }
 
   .profile-avatar {
@@ -238,14 +217,6 @@
 @layer utilities {
   .shadow-soft { box-shadow: var(--edge-shadow-soft); }
   .shadow-elevated { box-shadow: var(--edge-shadow-elevated); }
-  .shadow-pop { box-shadow: var(--edge-shadow-pop); }
-  
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .pt-safe {
-    padding-top: env(safe-area-inset-top);
-  }
 }
 
 /* Push sonner toasts above bottom nav on mobile */

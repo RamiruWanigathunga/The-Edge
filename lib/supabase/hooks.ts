@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { setLastAccount } from "@/lib/lastAccount";
 import {
   createOrder,
@@ -251,12 +252,69 @@ export function useLiveOrder(code: string) {
   return query;
 }
 
+// useUserOrders can be mounted multiple times at once (e.g. NotificationLink renders in
+// both the desktop Header and a page's own mobile bar). Supabase reuses the channel object
+// for a duplicate topic name, so a second `.on()` call on an already-subscribed channel
+// throws. This registry ref-counts subscribers per userId so only one real channel is ever
+// created, and it's only torn down once every hook instance for that user has unmounted.
+const userOrdersSubscribers = new Map<
+  string,
+  { channel: RealtimeChannel; listeners: Set<() => void> }
+>();
+
+function subscribeToUserOrders(userId: string, onChange: () => void) {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return () => {};
+
+  let entry = userOrdersSubscribers.get(userId);
+  if (!entry) {
+    const channel = supabase
+      .channel(`user-orders:${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "orders",
+          filter: `user_id=eq.${userId}`,
+        },
+        () => entry?.listeners.forEach((listener) => listener())
+      )
+      .subscribe();
+    entry = { channel, listeners: new Set() };
+    userOrdersSubscribers.set(userId, entry);
+  }
+  entry.listeners.add(onChange);
+
+  return () => {
+    const current = userOrdersSubscribers.get(userId);
+    if (!current) return;
+    current.listeners.delete(onChange);
+    if (current.listeners.size === 0 && current.channel) {
+      supabase.removeChannel(current.channel);
+      userOrdersSubscribers.delete(userId);
+    }
+  };
+}
+
 export function useUserOrders(userId?: string) {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ["user-orders", userId],
     queryFn: () => fetchUserOrders(userId!),
     enabled: Boolean(userId),
+    refetchInterval: 15000, // Backup polling for mobile sleep/wake
   });
+
+  useEffect(() => {
+    if (!userId) return;
+    return subscribeToUserOrders(userId, () =>
+      queryClient.invalidateQueries({ queryKey: ["user-orders", userId] })
+    );
+  }, [userId, queryClient]);
+
+  return query;
 }
 
 // ---------------------------------------------------------------------------

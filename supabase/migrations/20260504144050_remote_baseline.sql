@@ -1,0 +1,1 @@
+-- Placeholder reconciling remote migration history. See 20260504143957_remote_baseline.sql.

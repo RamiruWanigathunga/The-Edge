@@ -1,5 +1,3 @@
-"use client";
-
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Suspense } from "react";
 

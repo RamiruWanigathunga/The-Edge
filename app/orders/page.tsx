@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { displayReferenceNumber } from "@/lib/types";
 import { useUserOrders, useSupabaseUser } from "@/lib/supabase/hooks";
 import { BillIcon } from "@/components/ui/NavIcons";
+import { startOfDay } from "@/lib/utils";
 
 type TimeFilter = "all" | "today" | "week" | "month";
 
@@ -19,10 +20,6 @@ const timeFilters: { id: TimeFilter; label: string }[] = [
   { id: "week", label: "This week" },
   { id: "month", label: "This month" },
 ];
-
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
 
 function startOfWeek(date: Date) {
   const start = startOfDay(date);

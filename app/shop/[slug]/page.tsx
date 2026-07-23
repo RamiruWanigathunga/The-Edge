@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { AlertCircle } from "lucide-react";
 import { FoodCard } from "@/components/shop/FoodCard";
@@ -72,7 +73,7 @@ export default function ShopPage() {
       {/* Banner */}
       <div className="w-full h-48 sm:h-64 relative bg-secondary border-b border-border">
         {shop.banner ? (
-          <img src={shop.banner} alt={shop.name} className="w-full h-full object-cover" />
+          <Image src={shop.banner} alt={shop.name} fill sizes="100vw" className="object-cover" priority />
         ) : (
           <div className="w-full h-full grid place-items-center text-6xl">{shop.emoji}</div>
         )}

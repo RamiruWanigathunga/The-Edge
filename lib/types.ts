@@ -67,14 +67,6 @@ export type Receipt = {
   status: OrderStatus;
 };
 
-export type UserProfile = {
-  id: string;
-  displayName: string;
-  email: string;
-  avatarUrl?: string;
-  totalOrders: number;
-};
-
 export type PerShopOrder = {
   id: string;
   orderCode: string;

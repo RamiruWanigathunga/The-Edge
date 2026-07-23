@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Shop } from "@/lib/types";
 import { motion } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
@@ -67,10 +68,12 @@ export const ShopCard = ({ shop }: ShopCardProps) => {
         {/* Banner Image Area */}
         <div className="relative h-[90px] w-full flex-shrink-0 bg-secondary overflow-hidden">
           {shop.banner ? (
-            <img 
-              src={shop.banner} 
-              alt={shop.name} 
-              className="w-full h-full object-cover" 
+            <Image
+              src={shop.banner}
+              alt={shop.name}
+              fill
+              sizes="260px"
+              className="object-cover"
             />
           ) : (
             <div className="w-full h-full grid place-items-center text-3xl">{shop.emoji}</div>

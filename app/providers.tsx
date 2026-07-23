@@ -4,9 +4,6 @@ import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { useState, useEffect } from "react";
-// TODO: Replace with real PostHog key from environment variable
-// import posthog from "posthog-js";
-// import { PostHogProvider } from "posthog-js/react";
 
 import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
 
@@ -40,7 +37,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         defaultTheme="light"
         disableTransitionOnChange
       >
-        {/* TODO: Wrap with PostHogProvider once real key is set */}
         <ThemeColorSync />
         {children}
         <Toaster

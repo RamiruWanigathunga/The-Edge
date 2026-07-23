@@ -1,0 +1,6 @@
+-- Placeholder: reconciles remote migration history with the local migrations directory.
+-- This version was already applied to the live project when it was first bootstrapped
+-- (before this repo tracked individual migration files). No SQL to run here — the actual
+-- schema for this point in time is captured in supabase/schema.sql, which remains the
+-- source of truth. This file exists only so `supabase migration list` / `db push` recognize
+-- the remote version and don't report it as missing locally.
